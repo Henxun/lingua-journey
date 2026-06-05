@@ -11,7 +11,8 @@ import {
   handleOAuthCallback,
   handleLinkOAuth,
   handleUnlinkOAuth,
-  handleResetPassword
+  handleResetPassword,
+  getAccountInfo
 } from '../controllers/authController';
 import { authenticate } from '../middleware/authMiddleware';
 
@@ -34,5 +35,7 @@ router.post('/link-oauth', authenticate, handleLinkOAuth);
 router.delete('/unlink-oauth/:provider', authenticate, handleUnlinkOAuth);
 
 router.post('/password-reset/reset', handleResetPassword);
+
+router.get('/account', authenticate, getAccountInfo);
 
 export default router;

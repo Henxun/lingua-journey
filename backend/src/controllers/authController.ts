@@ -433,3 +433,44 @@ export async function handleUnlinkOAuth(req: Request, res: Response) {
     res.status(400).json({ error: (error as Error).message });
   }
 }
+
+export async function getAccountInfo(req: Request, res: Response) {
+  try {
+    const userId = (req as any).user.id;
+    const user = await getUserProfile(userId);
+    
+    const linkedAccounts: { provider: string; email: string; avatar_url?: string }[] = [];
+    
+    if (user.oauth_profiles) {
+      if (user.oauth_profiles.google) {
+        linkedAccounts.push({
+          provider: 'google',
+          email: user.oauth_profiles.google.email,
+          avatar_url: user.oauth_profiles.google.avatar_url
+        });
+      }
+      if (user.oauth_profiles.github) {
+        linkedAccounts.push({
+          provider: 'github',
+          email: user.oauth_profiles.github.email,
+          avatar_url: user.oauth_profiles.github.avatar_url
+        });
+      }
+    }
+    
+    res.status(200).json({
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      native_language: user.native_language,
+      target_language: user.target_language,
+      level: user.level,
+      avatar_url: user.avatar_url,
+      has_password: !!user.password_hash,
+      linked_accounts: linkedAccounts,
+      primary_provider: user.auth_provider
+    });
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
+}
