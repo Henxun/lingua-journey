@@ -210,6 +210,12 @@ export default function Profile() {
 
                 <div className="flex gap-3">
                   <button
+                    onClick={() => router.push('/profile/stats')}
+                    className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-xl font-medium hover:from-green-700 hover:to-emerald-700 transition-colors"
+                  >
+                    View Learning Stats
+                  </button>
+                  <button
                     onClick={() => setEditing(true)}
                     className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-colors"
                   >

@@ -103,4 +103,6 @@ export const authAPI = {
       method: 'POST',
       body: JSON.stringify({ email, code, new_password: newPassword }),
     }),
+
+  getLearningStats: () => fetchAPI('/stats/learning'),
 };

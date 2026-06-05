@@ -22,6 +22,14 @@ interface OAuthProfile {
   github?: { id: string; email: string; avatar_url?: string };
 }
 
+interface LearningStats {
+  total_time_minutes: number;
+  practice_count: number;
+  total_score: number;
+  last_practice_date: string;
+  streak_days: number;
+}
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -71,6 +79,9 @@ export class User {
 
   @Column({ type: 'simple-json', nullable: true })
   oauth_profiles: OAuthProfile;
+
+  @Column({ type: 'simple-json', nullable: true })
+  learning_stats: LearningStats;
 
   @CreateDateColumn()
   created_at: Date;
