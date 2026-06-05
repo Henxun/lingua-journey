@@ -8,6 +8,7 @@ import conversationRoutes from './routes/conversationRoutes';
 import sceneRoutes from './routes/sceneRoutes';
 import statsRoutes from './routes/statsRoutes';
 import courseRoutes from './routes/courseRoutes';
+import { seedCourses } from './seed';
 
 dotenv.config();
 
@@ -34,8 +35,9 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/courses', courseRoutes);
 
 AppDataSource.initialize()
-  .then(() => {
+  .then(async () => {
     console.log('Database connected successfully');
+    await seedCourses();
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });

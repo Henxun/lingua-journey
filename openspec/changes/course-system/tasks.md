@@ -29,7 +29,7 @@
 
 - [x] 5.1 创建 /courses 课程列表页面
 - [x] 5.2 创建 /courses/[id] 课程详情页面
-- [ ] 5.3 创建 /courses/[id]/lessons/[lessonId] 章节学习页面
+- [x] 5.3 创建 /courses/[id]/lessons/[lessonId] 章节学习页面
 - [x] 5.4 更新首页添加课程入口
 - [x] 5.5 更新个人资料页面显示学习中的课程
 
