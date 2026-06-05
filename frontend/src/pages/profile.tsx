@@ -14,6 +14,7 @@ type UserProfile = {
   auth_provider: string;
   email_verified: boolean;
   oauth_profiles?: any;
+  has_password?: boolean;
 };
 
 const languages = [
@@ -228,6 +229,15 @@ export default function Profile() {
                     className="text-blue-600 hover:text-blue-700 font-medium"
                   >
                     {showPasswordForm ? 'Cancel' : 'Change Password'}
+                  </button>
+                )}
+
+                {profile.auth_provider !== 'email' && !profile.has_password && (
+                  <button
+                    onClick={() => router.push('/profile/settings')}
+                    className="text-green-600 hover:text-green-700 font-medium"
+                  >
+                    Set up password →
                   </button>
                 )}
 

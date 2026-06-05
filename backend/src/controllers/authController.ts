@@ -153,7 +153,8 @@ export async function getProfile(req: Request, res: Response) {
       avatar_url: user.avatar_url,
       auth_provider: user.auth_provider,
       email_verified: user.email_verified,
-      oauth_profiles: user.oauth_profiles
+      oauth_profiles: user.oauth_profiles,
+      has_password: !!user.password_hash
     });
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
