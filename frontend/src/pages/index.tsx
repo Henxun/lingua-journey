@@ -25,7 +25,7 @@ export default function Home() {
             </div>
             <div className="flex items-center space-x-4">
               <button className="text-gray-600 hover:text-blue-600 transition-colors">功能</button>
-              <button className="text-gray-600 hover:text-blue-600 transition-colors">课程</button>
+              <Link href="/courses" className="text-gray-600 hover:text-blue-600 transition-colors">课程</Link>
               <button className="text-gray-600 hover:text-blue-600 transition-colors">社区</button>
               {user ? (
                 <>
@@ -61,9 +61,9 @@ export default function Home() {
             通过AI模拟真实对话场景，沉浸式学习多语种。从日常对话到商务场景，让语言学习变得更加生动有趣。
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <button className="px-8 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold text-lg hover:opacity-90 transition-all hover:scale-105 shadow-lg shadow-blue-500/30">
+            <Link href="/courses" className="px-8 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold text-lg hover:opacity-90 transition-all hover:scale-105 shadow-lg shadow-blue-500/30">
               开始学习
-            </button>
+            </Link>
             <button className="px-8 py-4 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold text-lg hover:border-blue-500 hover:text-blue-600 transition-colors">
               了解更多
             </button>

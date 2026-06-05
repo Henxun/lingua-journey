@@ -106,3 +106,24 @@ export const authAPI = {
 
   getLearningStats: () => fetchAPI('/stats/learning'),
 };
+
+export const courseAPI = {
+  getAllCourses: (language?: string, difficulty?: string) => {
+    const params = new URLSearchParams();
+    if (language) params.set('language', language);
+    if (difficulty) params.set('difficulty', difficulty);
+    return fetchAPI(`/courses?${params.toString()}`);
+  },
+  
+  getCourse: (id: string) => fetchAPI(`/courses/${id}`),
+  
+  getMyCourses: () => fetchAPI('/courses/my'),
+  
+  getCourseProgress: (id: string) => fetchAPI(`/courses/${id}/progress`),
+  
+  enrollCourse: (id: string) => 
+    fetchAPI(`/courses/${id}/enroll`, { method: 'POST' }),
+  
+  completeLesson: (id: string, lessonId: string) => 
+    fetchAPI(`/courses/${id}/lessons/${lessonId}/complete`, { method: 'PUT' }),
+};

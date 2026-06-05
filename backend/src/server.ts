@@ -7,6 +7,7 @@ import authRoutes from './routes/authRoutes';
 import conversationRoutes from './routes/conversationRoutes';
 import sceneRoutes from './routes/sceneRoutes';
 import statsRoutes from './routes/statsRoutes';
+import courseRoutes from './routes/courseRoutes';
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/scenes', sceneRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/courses', courseRoutes);
 
 AppDataSource.initialize()
   .then(() => {

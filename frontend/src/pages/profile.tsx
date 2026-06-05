@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
-import { authAPI } from '../lib/api';
+import { authAPI, courseAPI } from '../lib/api';
 
 type UserProfile = {
   id: string;
@@ -15,6 +15,26 @@ type UserProfile = {
   email_verified: boolean;
   oauth_profiles?: any;
   has_password?: boolean;
+};
+
+type CourseProgress = {
+  id: string;
+  user_id: string;
+  course_id: string;
+  current_lesson_id?: string;
+  completed_lessons: string[];
+  started_at: string;
+  completed_at?: string;
+  updated_at: string;
+  course: {
+    id: string;
+    name: string;
+    description?: string;
+    language: string;
+    difficulty: string;
+    thumbnail_url?: string;
+    lessons: any[];
+  };
 };
 
 const languages = [
@@ -46,6 +66,7 @@ export default function Profile() {
   });
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [myCourses, setMyCourses] = useState<CourseProgress[]>([]);
 
   useEffect(() => {
     if (!user) {
@@ -53,6 +74,7 @@ export default function Profile() {
       return;
     }
     fetchProfile();
+    fetchMyCourses();
   }, [user, router]);
 
   const fetchProfile = async () => {
@@ -69,6 +91,15 @@ export default function Profile() {
       setMessage({ text: 'Failed to load profile', type: 'error' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMyCourses = async () => {
+    try {
+      const data = await courseAPI.getMyCourses();
+      setMyCourses(data);
+    } catch (error) {
+      console.error('Failed to load courses:', error);
     }
   };
 
@@ -160,6 +191,44 @@ export default function Profile() {
                 <p className="text-sm text-gray-500">Level {profile.level}</p>
               </div>
             </div>
+
+            {myCourses.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">My Courses</h3>
+                <div className="grid gap-4">
+                  {myCourses.map((progress) => {
+                    const totalLessons = progress.course.lessons?.length || 0;
+                    const completedLessons = progress.completed_lessons?.length || 0;
+                    const percentage = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+                    return (
+                      <div
+                        key={progress.id}
+                        onClick={() => router.push(`/courses/${progress.course_id}`)}
+                        className="bg-gray-50 rounded-xl p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="flex justify-between items-center mb-2">
+                          <h4 className="font-semibold text-gray-900">{progress.course.name}</h4>
+                          <span className="text-sm text-blue-600">{percentage}% complete</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                          <div
+                            className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full"
+                            style={{ width: `${percentage}%` }}
+                          ></div>
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          {progress.completed_at ? (
+                            <span className="text-green-600">✓ Completed</span>
+                          ) : (
+                            <span>In Progress</span>
+                          )}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {!editing ? (
               <div className="space-y-6">
