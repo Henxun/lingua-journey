@@ -19,6 +19,12 @@ export default function AccountSettings() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
+  // Password form state
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
@@ -62,6 +68,49 @@ export default function AccountSettings() {
       await loadAccountInfo();
     } catch (err: any) {
       setError(err.message || 'Failed to unlink account');
+    }
+  };
+
+  const getPasswordStrength = (password: string): { strength: string; color: string; passed: boolean } => {
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+
+    if (strength <= 1) return { strength: 'Weak', color: 'text-red-600', passed: false };
+    if (strength <= 2) return { strength: 'Medium', color: 'text-yellow-600', passed: false };
+    return { strength: 'Strong', color: 'text-green-600', passed: true };
+  };
+
+  const handleSetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setMessage('');
+
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    const strength = getPasswordStrength(newPassword);
+    if (!strength.passed) {
+      setError('Password must be at least 8 characters with uppercase, lowercase, and numbers');
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      await authAPI.setPassword(newPassword);
+      setMessage('Password set successfully');
+      setShowPasswordForm(false);
+      setNewPassword('');
+      setConfirmPassword('');
+      await loadAccountInfo();
+    } catch (err: any) {
+      setError(err.message || 'Failed to set password');
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -170,14 +219,69 @@ export default function AccountSettings() {
           <h2 className="text-lg font-semibold mb-4">Password</h2>
           {accountInfo?.has_password ? (
             <p className="text-gray-600">Password is set</p>
+          ) : showPasswordForm ? (
+            <form onSubmit={handleSetPassword}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                {newPassword && (
+                  <p className={`text-sm mt-1 ${getPasswordStrength(newPassword).color}`}>
+                    Strength: {getPasswordStrength(newPassword).strength}
+                  </p>
+                )}
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={passwordLoading}
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {passwordLoading ? 'Setting...' : 'Set Password'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPasswordForm(false);
+                    setNewPassword('');
+                    setConfirmPassword('');
+                    setError('');
+                  }}
+                  className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           ) : (
-            <p className="text-gray-600">
-              You can set a password by using the{' '}
-              <Link href="/forgot-password" className="text-blue-600 hover:underline">
-                forgot password
-              </Link>{' '}
-              flow.
-            </p>
+            <div>
+              <p className="text-gray-600 mb-2">You have not set a password yet.</p>
+              <button
+                onClick={() => setShowPasswordForm(true)}
+                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              >
+                Set Password
+              </button>
+            </div>
           )}
         </div>
       </div>

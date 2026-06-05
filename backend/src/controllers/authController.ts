@@ -6,6 +6,7 @@ import {
   getUserProfile, 
   updateUserProfile, 
   changePassword,
+  setPassword,
   generateToken,
   resetPassword,
   invalidateVerificationCodes
@@ -53,6 +54,10 @@ const updateProfileSchema = z.object({
 const changePasswordSchema = z.object({
   old_password: z.string().min(6),
   new_password: z.string().min(6)
+});
+
+const setPasswordSchema = z.object({
+  new_password: z.string().min(8)
 });
 
 const resetPasswordSchema = z.object({
@@ -181,6 +186,17 @@ export async function handleChangePassword(req: Request, res: Response) {
     const { old_password, new_password } = changePasswordSchema.parse(req.body);
     await changePassword(userId, old_password, new_password);
     res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
+}
+
+export async function handleSetPassword(req: Request, res: Response) {
+  try {
+    const userId = (req as any).user.id;
+    const { new_password } = setPasswordSchema.parse(req.body);
+    await setPassword(userId, new_password);
+    res.status(200).json({ message: 'Password set successfully' });
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
   }

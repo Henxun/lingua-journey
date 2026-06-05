@@ -7,6 +7,7 @@ import {
   getProfile,
   updateProfile,
   handleChangePassword,
+  handleSetPassword,
   handleOAuthRedirect,
   handleOAuthCallback,
   handleLinkOAuth,
@@ -30,6 +31,7 @@ router.get('/oauth/:provider/callback', handleOAuthCallback);
 router.get('/profile', authenticate, getProfile);
 router.put('/profile', authenticate, updateProfile);
 router.post('/change-password', authenticate, handleChangePassword);
+router.post('/set-password', authenticate, handleSetPassword);
 
 router.post('/link-oauth', authenticate, handleLinkOAuth);
 router.delete('/unlink-oauth/:provider', authenticate, handleUnlinkOAuth);

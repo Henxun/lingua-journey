@@ -145,6 +145,33 @@ export async function changePassword(
   return await userRepository.save(user);
 }
 
+export async function setPassword(
+  userId: string,
+  newPassword: string
+) {
+  const user = await userRepository.findOne({ where: { id: userId } });
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  // Validate password strength
+  if (newPassword.length < 8) {
+    throw new Error('Password must be at least 8 characters');
+  }
+  if (!/[A-Z]/.test(newPassword)) {
+    throw new Error('Password must contain at least one uppercase letter');
+  }
+  if (!/[a-z]/.test(newPassword)) {
+    throw new Error('Password must contain at least one lowercase letter');
+  }
+  if (!/[0-9]/.test(newPassword)) {
+    throw new Error('Password must contain at least one number');
+  }
+
+  user.password_hash = await bcrypt.hash(newPassword, 10);
+  return await userRepository.save(user);
+}
+
 export function verifyToken(token: string) {
   try {
     return jwt.verify(token, process.env.JWT_SECRET!) as { userId: string; email: string };

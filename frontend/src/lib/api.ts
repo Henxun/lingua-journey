@@ -85,6 +85,12 @@ export const authAPI = {
       body: JSON.stringify({ old_password, new_password }),
     }),
   
+  setPassword: (new_password: string) =>
+    fetchAPI('/auth/set-password', {
+      method: 'POST',
+      body: JSON.stringify({ new_password }),
+    }),
+  
   getAccountInfo: () => fetchAPI('/auth/account'),
   
   unlinkOAuth: (provider: string) => 
