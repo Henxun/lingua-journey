@@ -1,0 +1,5 @@
+version: "1.0"
+name: auth-oauth-login
+description: "实现支持 Google、GitHub 和邮箱的登录/注册功能"
+created_at: "2026-06-04T00:00:00.000Z"
+schema: default
