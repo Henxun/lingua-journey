@@ -133,7 +133,7 @@ export async function changePassword(
   }
 
   if (!user.password_hash) {
-    throw new Error('Please set a password first');
+    throw new Error('You have not set a password. Please use the "Forgot Password" flow to set a password first.');
   }
 
   const isValid = await bcrypt.compare(oldPassword, user.password_hash);
