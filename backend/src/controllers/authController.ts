@@ -6,7 +6,9 @@ import {
   getUserProfile, 
   updateUserProfile, 
   changePassword,
-  generateToken
+  generateToken,
+  resetPassword,
+  invalidateVerificationCodes
 } from '../services/authService';
 import { sendVerificationCode, verifyCode } from '../services/emailService';
 import { findOrCreateOAuthUser, linkOAuthAccount, unlinkOAuthAccount, OAuthUserInfo } from '../services/oauthService';
@@ -51,6 +53,12 @@ const updateProfileSchema = z.object({
 const changePasswordSchema = z.object({
   old_password: z.string().min(6),
   new_password: z.string().min(6)
+});
+
+const resetPasswordSchema = z.object({
+  email: z.string().email(),
+  code: z.string().length(6),
+  new_password: z.string().min(8)
 });
 
 export async function register(req: Request, res: Response) {
@@ -173,6 +181,25 @@ export async function handleChangePassword(req: Request, res: Response) {
     const { old_password, new_password } = changePasswordSchema.parse(req.body);
     await changePassword(userId, old_password, new_password);
     res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
+}
+
+export async function handleResetPassword(req: Request, res: Response) {
+  try {
+    const { email, code, new_password } = resetPasswordSchema.parse(req.body);
+    
+    // Verify the verification code
+    await verifyCode(email, code, VerificationCodeType.RESET_PASSWORD);
+    
+    // Reset the password
+    await resetPassword(email, new_password);
+    
+    // Invalidate all verification codes for this email
+    await invalidateVerificationCodes(email);
+    
+    res.status(200).json({ message: 'Password has been reset successfully' });
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
   }

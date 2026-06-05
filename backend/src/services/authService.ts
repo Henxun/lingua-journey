@@ -1,9 +1,11 @@
 import { AppDataSource } from '../config/database';
 import { User, AuthProvider } from '../entities/User';
+import { VerificationCode } from '../entities/VerificationCode';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 const userRepository = AppDataSource.getRepository(User);
+const verificationCodeRepository = AppDataSource.getRepository(VerificationCode);
 
 export function generateToken(user: User): string {
   return jwt.sign(
@@ -149,4 +151,38 @@ export function verifyToken(token: string) {
   } catch {
     throw new Error('Invalid token');
   }
+}
+
+export async function resetPassword(
+  email: string,
+  newPassword: string
+): Promise<User> {
+  const user = await userRepository.findOne({ where: { email } });
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  // Validate password strength
+  if (newPassword.length < 8) {
+    throw new Error('Password must be at least 8 characters');
+  }
+  if (!/[A-Z]/.test(newPassword)) {
+    throw new Error('Password must contain at least one uppercase letter');
+  }
+  if (!/[a-z]/.test(newPassword)) {
+    throw new Error('Password must contain at least one lowercase letter');
+  }
+  if (!/[0-9]/.test(newPassword)) {
+    throw new Error('Password must contain at least one number');
+  }
+
+  user.password_hash = await bcrypt.hash(newPassword, 10);
+  return await userRepository.save(user);
+}
+
+export async function invalidateVerificationCodes(email: string): Promise<void> {
+  await verificationCodeRepository.update(
+    { email },
+    { is_used: true }
+  );
 }

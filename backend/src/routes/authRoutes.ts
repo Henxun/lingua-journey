@@ -10,7 +10,8 @@ import {
   handleOAuthRedirect,
   handleOAuthCallback,
   handleLinkOAuth,
-  handleUnlinkOAuth
+  handleUnlinkOAuth,
+  handleResetPassword
 } from '../controllers/authController';
 import { authenticate } from '../middleware/authMiddleware';
 
@@ -31,5 +32,7 @@ router.post('/change-password', authenticate, handleChangePassword);
 
 router.post('/link-oauth', authenticate, handleLinkOAuth);
 router.delete('/unlink-oauth/:provider', authenticate, handleUnlinkOAuth);
+
+router.post('/password-reset/reset', handleResetPassword);
 
 export default router;
