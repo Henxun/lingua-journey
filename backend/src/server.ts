@@ -13,6 +13,9 @@ import learningGoalRoutes from './routes/learningGoalRoutes';
 import learningPathRoutes from './routes/learningPathRoutes';
 import recommendationRoutes from './routes/recommendationRoutes';
 import vocabularyCardRoutes from './routes/vocabularyCardRoutes';
+import aiTeacherRoutes from './routes/aiTeacherRoutes';
+import assessmentRoutes from './routes/assessmentRoutes';
+import progressRoutes from './routes/progressRoutes';
 import { seedCourses } from './seed';
 import { seedAchievements, seedDailyQuests } from './services/gamificationService';
 
@@ -44,6 +47,9 @@ app.use('/api/learning/goals', learningGoalRoutes);
 app.use('/api/learning/path', learningPathRoutes);
 app.use('/api/learning/recommendations', recommendationRoutes);
 app.use('/api/vocabulary', vocabularyCardRoutes);
+app.use('/api/ai-teacher', aiTeacherRoutes);
+app.use('/api/assessments', assessmentRoutes);
+app.use('/api/progress', progressRoutes);
 
 AppDataSource.initialize()
   .then(async () => {
