@@ -462,3 +462,166 @@ export const vocabularyAPI = {
   getReviewStats: (days?: number): Promise<ReviewStats> =>
     fetchAPI(`/vocabulary/reviews/stats${days ? `?days=${days}` : ''}`),
 };
+
+// AI Teacher Types
+export interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+}
+
+export interface AITeacherSession {
+  id: string;
+  userId: string;
+  topic: string;
+  context?: string;
+  messages: Message[];
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface AIContext {
+  targetLanguage: string;
+  nativeLanguage: string;
+  cefrLevel: string;
+  topic?: string;
+}
+
+export const aiTeacherAPI = {
+  createSession: (topic: string, context?: string): Promise<AITeacherSession> =>
+    fetchAPI('/ai-teacher/sessions', {
+      method: 'POST',
+      body: JSON.stringify({ topic, context }),
+    }),
+
+  getSessions: (): Promise<AITeacherSession[]> =>
+    fetchAPI('/ai-teacher/sessions'),
+
+  getSession: (id: string): Promise<AITeacherSession> =>
+    fetchAPI(`/ai-teacher/sessions/${id}`),
+
+  sendMessage: (id: string, message: string, aiContext: AIContext): Promise<{ userMessage: Message; assistantMessage: Message }> =>
+    fetchAPI(`/ai-teacher/sessions/${id}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ message, aiContext }),
+    }),
+
+  getExplanation: (topic: string, type: 'grammar' | 'vocabulary', aiContext: AIContext): Promise<{ explanation: string }> =>
+    fetchAPI('/ai-teacher/explain', {
+      method: 'POST',
+      body: JSON.stringify({ topic, type, aiContext }),
+    }),
+
+  getCorrection: (text: string, aiContext: AIContext): Promise<{ correction: string }> =>
+    fetchAPI('/ai-teacher/correct', {
+      method: 'POST',
+      body: JSON.stringify({ text, aiContext }),
+    }),
+
+  getPracticeQuestion: (topic: string, aiContext: AIContext): Promise<{ question: string }> =>
+    fetchAPI('/ai-teacher/practice', {
+      method: 'POST',
+      body: JSON.stringify({ topic, aiContext }),
+    }),
+};
+
+// Assessment Types
+export interface Question {
+  id: string;
+  type: 'multiple-choice' | 'fill-blank' | 'open-ended';
+  skill: string;
+  prompt: string;
+  options?: string[];
+  correctAnswer?: string;
+  points: number;
+  level: string;
+}
+
+export interface Assessment {
+  id: string;
+  name: string;
+  level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
+  skills: string[];
+  timeLimit: number;
+  passingScore: number;
+  questions: Question[];
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface Answer {
+  questionId: string;
+  answer: string;
+  isCorrect?: boolean;
+  score?: number;
+  feedback?: string;
+}
+
+export interface AssessmentResult {
+  id: string;
+  userId: string;
+  assessmentId: string;
+  score: number;
+  skillScores: { [key: string]: number };
+  answers: Answer[];
+  feedback?: string;
+  recommendations?: string[];
+  completedAt?: string;
+  createdAt: string;
+}
+
+export interface UserSkillProfile {
+  id: string;
+  userId: string;
+  skill: string;
+  level: string;
+  score: number;
+  lastAssessed?: string;
+  trend: 'improving' | 'stable' | 'declining';
+  historicalScores: { date: string; score: number }[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const assessmentAPI = {
+  getAssessments: (): Promise<Assessment[]> =>
+    fetchAPI('/assessments'),
+
+  getAssessment: (id: string): Promise<Assessment> =>
+    fetchAPI(`/assessments/${id}`),
+
+  submitAssessment: (id: string, answers: Answer[]): Promise<AssessmentResult> =>
+    fetchAPI(`/assessments/${id}/submit`, {
+      method: 'POST',
+      body: JSON.stringify({ answers }),
+    }),
+
+  getResults: (): Promise<AssessmentResult[]> =>
+    fetchAPI('/assessments/results'),
+
+  getSkills: (): Promise<UserSkillProfile[]> =>
+    fetchAPI('/assessments/skills'),
+};
+
+// Progress Types
+export interface LearningInsights {
+  averageScore: number;
+  totalAssessments: number;
+  bestSkill: string;
+  needsImprovement: string;
+  weeklyProgress: { date: string; score: number }[];
+  recommendations: string[];
+}
+
+export const progressAPI = {
+  getInsights: (): Promise<LearningInsights> =>
+    fetchAPI('/progress/insights'),
+
+  getTrend: (skill?: string): Promise<{ date: string; score: number }[]> => {
+    const url = skill
+      ? `/progress/trend?skill=${encodeURIComponent(skill)}`
+      : '/progress/trend';
+    return fetchAPI(url);
+  },
+};
