@@ -21,13 +21,17 @@ import { VocabularyCard } from '../entities/VocabularyCard';
 import { VocabularyDeck } from '../entities/VocabularyDeck';
 import { ReviewLog } from '../entities/ReviewLog';
 import { DeckCard } from '../entities/DeckCard';
+import { Assessment } from '../entities/Assessment';
+import { AssessmentResult } from '../entities/AssessmentResult';
+import { AITeacherSession } from '../entities/AITeacherSession';
+import { UserSkillProfile } from '../entities/UserSkillProfile';
 
 dotenv.config();
 
 export const AppDataSource = new DataSource({
   type: 'better-sqlite3',
   database: './dev.db',
-  entities: [User, VerificationCode, Conversation, Course, Lesson, CourseProgress, Scene, SceneObject, ConversationSession, ConversationMessage, Achievement, UserAchievement, DailyQuest, UserQuestProgress, LearningGoal, LearningPath, RecommendedCourse, VocabularyCard, VocabularyDeck, ReviewLog, DeckCard],
+  entities: [User, VerificationCode, Conversation, Course, Lesson, CourseProgress, Scene, SceneObject, ConversationSession, ConversationMessage, Achievement, UserAchievement, DailyQuest, UserQuestProgress, LearningGoal, LearningPath, RecommendedCourse, VocabularyCard, VocabularyDeck, ReviewLog, DeckCard, Assessment, AssessmentResult, AITeacherSession, UserSkillProfile],
   synchronize: true,
   logging: process.env.NODE_ENV === 'development'
 });
