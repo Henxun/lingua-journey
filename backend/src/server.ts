@@ -8,7 +8,13 @@ import conversationRoutes from './routes/conversationRoutes';
 import sceneRoutes from './routes/sceneRoutes';
 import statsRoutes from './routes/statsRoutes';
 import courseRoutes from './routes/courseRoutes';
+import gamificationRoutes from './routes/gamificationRoutes';
+import learningGoalRoutes from './routes/learningGoalRoutes';
+import learningPathRoutes from './routes/learningPathRoutes';
+import recommendationRoutes from './routes/recommendationRoutes';
+import vocabularyCardRoutes from './routes/vocabularyCardRoutes';
 import { seedCourses } from './seed';
+import { seedAchievements, seedDailyQuests } from './services/gamificationService';
 
 dotenv.config();
 
@@ -33,11 +39,18 @@ app.use('/api/conversations', conversationRoutes);
 app.use('/api/scenes', sceneRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/courses', courseRoutes);
+app.use('/api/gamification', gamificationRoutes);
+app.use('/api/learning/goals', learningGoalRoutes);
+app.use('/api/learning/path', learningPathRoutes);
+app.use('/api/learning/recommendations', recommendationRoutes);
+app.use('/api/vocabulary', vocabularyCardRoutes);
 
 AppDataSource.initialize()
   .then(async () => {
     console.log('Database connected successfully');
     await seedCourses();
+    await seedAchievements();
+    await seedDailyQuests();
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });

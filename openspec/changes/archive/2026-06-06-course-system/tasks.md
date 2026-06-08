@@ -19,7 +19,7 @@
 - [x] 3.1 创建 courseController.ts
 - [x] 3.2 创建 courseRoutes.ts
 - [x] 3.3 更新 server.ts 注册课程路由
-- [ ] 3.4 添加示例课程种子数据
+- [x] 3.4 添加示例课程种子数据
 
 ## 4. 前端 API
 

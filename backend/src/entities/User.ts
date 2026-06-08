@@ -30,6 +30,13 @@ interface LearningStats {
   streak_days: number;
 }
 
+interface GamificationData {
+  xp: number;
+  weekly_xp: number;
+  monthly_xp: number;
+  last_check_in: string;
+}
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -82,6 +89,9 @@ export class User {
 
   @Column({ type: 'simple-json', nullable: true })
   learning_stats: LearningStats;
+
+  @Column({ type: 'simple-json', nullable: true })
+  gamification: GamificationData;
 
   @CreateDateColumn()
   created_at: Date;

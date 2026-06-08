@@ -1,0 +1,17 @@
+phase: archive
+name: learning-progress-stats
+created_at: "2026-06-05"
+verify_result: pass
+verified_at: "2026-06-06"
+archived: true
+verification_report: |
+  验收通过：
+  1. 后端构建成功
+  2. 前端构建成功
+  3. User entity 已有 learning_stats 字段
+  4. statsService 已完整实现（getLearningStats, updateLearningStats, calculateAccuracyRate）
+  5. statsController 和 statsRoutes 已实现
+  6. 前端 /profile/stats 页面已实现
+  7. 个人资料页面已有"View Learning Stats"入口
+  8. 数字卡片组件已实现（总时长、练习次数、正确率、连续天数）
+branch_status: clean

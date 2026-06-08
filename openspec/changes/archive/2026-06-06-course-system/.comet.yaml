@@ -1,0 +1,21 @@
+workflow: full
+phase: archive
+build_mode: null
+build_pause: null
+isolation: null
+verify_mode: null
+base_ref: 5e6ce971d4e40e331243bd315afa7b0ad06535e7
+design_doc: null
+plan: null
+verify_result: pass
+verification_report: |
+  验收通过：
+  1. 后端服务成功运行在3001端口，数据库连接正常
+  2. 前端服务成功运行在3002端口
+  3. 种子数据自动创建成功（3门课程）
+  4. API功能验证通过（课程列表、课程详情）
+  5. 所有构建任务通过
+branch_status: clean
+created_at: 2026-06-05
+verified_at: 2026-06-06
+archived: true

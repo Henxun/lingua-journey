@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useAuth } from '../../contexts/AuthContext';
 import { authAPI } from '../../lib/api';
+import { motion } from 'framer-motion';
 
 interface Stats {
   total_time_minutes: number;
@@ -11,6 +12,62 @@ interface Stats {
   streak_days: number;
   last_practice_date: string;
 }
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.15 }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 30, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.6 }
+  }
+};
+
+const statCards = [
+  {
+    key: 'total_time',
+    label: 'Total Learning Time',
+    icon: '⏱️',
+    color: 'from-blue-500 to-cyan-500',
+    bg: 'from-blue-50 to-cyan-50',
+    textColor: 'text-blue-700',
+    valueFn: (stats: Stats, formatFn: Function) => formatFn(stats.total_time_minutes)
+  },
+  {
+    key: 'practice_count',
+    label: 'Practice Sessions',
+    icon: '🎯',
+    color: 'from-green-500 to-emerald-500',
+    bg: 'from-green-50 to-emerald-50',
+    textColor: 'text-green-700',
+    valueFn: (stats: Stats) => `${stats.practice_count} times`
+  },
+  {
+    key: 'accuracy_rate',
+    label: 'Accuracy Rate',
+    icon: '📊',
+    color: 'from-purple-500 to-indigo-500',
+    bg: 'from-purple-50 to-indigo-50',
+    textColor: 'text-purple-700',
+    valueFn: (stats: Stats) => `${stats.accuracy_rate}%`
+  },
+  {
+    key: 'streak_days',
+    label: 'Current Streak',
+    icon: '🔥',
+    color: 'from-orange-500 to-red-500',
+    bg: 'from-orange-50 to-red-50',
+    textColor: 'text-orange-700',
+    valueFn: (stats: Stats) => `${stats.streak_days} days`
+  }
+];
 
 export default function LearningStats() {
   const router = useRouter();
@@ -49,82 +106,112 @@ export default function LearningStats() {
 
   if (loading || authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity }}
+          className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full"
+        />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-12 px-4">
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-white">Learning Statistics</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-16 px-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-12"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
                 href="/profile"
-                className="text-white/80 hover:text-white"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-2xl text-gray-700 font-semibold hover:bg-white transition-all shadow-lg border border-gray-100"
               >
-                ← Back
+                ← Back to Profile
               </Link>
+            </motion.div>
+          </div>
+          
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full text-sm font-bold text-blue-700 mb-6 shadow-lg border border-blue-100">
+              📈 Learning Dashboard
             </div>
+            <h1 className="text-5xl font-black text-gray-900 mb-4">Learning Statistics</h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">Track your progress and celebrate your achievements</p>
           </div>
+        </motion.div>
 
-          <div className="px-8 py-6">
-            {error && (
-              <div className="p-4 rounded-lg mb-6 bg-red-50 text-red-700">
-                {error}
-              </div>
-            )}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-6 bg-red-50 border-2 border-red-200 rounded-2xl text-red-700 text-center font-medium"
+          >
+            ❌ {error}
+          </motion.div>
+        )}
 
-            {stats ? (
-              <div className="grid grid-cols-2 gap-4">
-                {/* Total Time */}
-                <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
-                  <div className="text-sm font-medium text-blue-600 mb-2">Total Learning Time</div>
-                  <div className="text-3xl font-bold text-blue-900">
-                    {formatTime(stats.total_time_minutes)}
+        {stats ? (
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {statCards.map((card) => (
+              <motion.div
+                key={card.key}
+                variants={itemVariants}
+                whileHover={{ y: -8, scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                className={`bg-gradient-to-br ${card.bg} rounded-3xl p-8 shadow-xl border border-white/60 backdrop-blur-sm relative overflow-hidden group`}
+              >
+                {/* Decorative gradient */}
+                <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${card.color} opacity-10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500`} />
+                
+                <div className="relative">
+                  <div className="text-4xl mb-4">{card.icon}</div>
+                  <div className={`text-sm font-bold ${card.textColor} mb-2 uppercase tracking-wide`}>{card.label}</div>
+                  <div className={`text-4xl font-black text-gray-900 bg-gradient-to-r ${card.color} bg-clip-text`}>
+                    {card.valueFn(stats, formatTime)}
                   </div>
                 </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-24 bg-white/60 backdrop-blur-sm rounded-3xl border border-white/60 shadow-xl"
+          >
+            <div className="text-8xl mb-6">🚀</div>
+            <h2 className="text-3xl font-black text-gray-900 mb-4">Start Your Journey!</h2>
+            <p className="text-xl text-gray-600 max-w-md mx-auto">No statistics yet. Start your first practice session to begin tracking your amazing progress!</p>
+          </motion.div>
+        )}
 
-                {/* Practice Count */}
-                <div className="p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
-                  <div className="text-sm font-medium text-green-600 mb-2">Practice Count</div>
-                  <div className="text-3xl font-bold text-green-900">
-                    {stats.practice_count}
-                  </div>
-                </div>
-
-                {/* Accuracy Rate */}
-                <div className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl">
-                  <div className="text-sm font-medium text-purple-600 mb-2">Accuracy Rate</div>
-                  <div className="text-3xl font-bold text-purple-900">
-                    {stats.accuracy_rate}%
-                  </div>
-                </div>
-
-                {/* Streak Days */}
-                <div className="p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl">
-                  <div className="text-sm font-medium text-orange-600 mb-2">Streak Days</div>
-                  <div className="text-3xl font-bold text-orange-900">
-                    {stats.streak_days}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                No statistics data yet. Start practicing to see your progress!
-              </div>
-            )}
-
-            {stats && stats.last_practice_date && (
-              <div className="mt-6 text-center text-sm text-gray-500">
-                Last practice: {new Date(stats.last_practice_date).toLocaleDateString()}
-              </div>
-            )}
-          </div>
-        </div>
+        {stats && stats.last_practice_date && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="mt-12 text-center"
+          >
+            <div className="inline-flex items-center gap-2 px-8 py-4 bg-white/80 backdrop-blur-sm rounded-2xl text-gray-600 font-semibold shadow-lg border border-gray-100">
+              📅 Last practice: {new Date(stats.last_practice_date).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                weekday: 'long'
+              })}
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   );

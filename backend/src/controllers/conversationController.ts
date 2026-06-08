@@ -1,155 +1,129 @@
 import { Request, Response } from 'express';
-import { AppDataSource } from '../config/database';
-import { Conversation, Message } from '../entities/Conversation';
-import { User } from '../entities/User';
-import { generateResponse, analyzeConversation } from '../services/aiService';
-import { z } from 'zod';
+import { 
+  createConversation, 
+  getConversationById, 
+  getConversationHistory,
+  sendMessage,
+  getConversationMessages,
+  completeConversation,
+  abandonConversation,
+  calculateScore
+} from '../services/conversationService';
 
-const conversationRepository = AppDataSource.getRepository(Conversation);
-
-const startSchema = z.object({
-  scenario: z.string()
-});
-
-const messageSchema = z.object({
-  conversation_id: z.string().uuid(),
-  message: z.string(),
-  is_voice: z.boolean().optional().default(false)
-});
-
-export async function startConversation(req: Request, res: Response) {
+export async function createConversationHandler(req: Request, res: Response) {
   try {
-    const { scenario } = startSchema.parse(req.body);
-    const user = (req as any).user!;
+    const { lesson_id } = req.body;
+    const userId = (req as any).user?.id;
 
-    const conversation = conversationRepository.create({
-      user_id: user.id,
-      scenario,
-      messages: []
-    });
-
-    const savedConversation = await conversationRepository.save(conversation);
-
-    const initialMessages: { role: string; content: string }[] = [];
-    const aiResponse = await generateResponse(initialMessages, scenario, user.target_language);
-
-    const firstMessage: Message = {
-      id: crypto.randomUUID(),
-      role: 'assistant',
-      content: aiResponse,
-      timestamp: new Date()
-    };
-
-    savedConversation.messages = [firstMessage];
-    await conversationRepository.save(savedConversation);
-
-    res.status(201).json({
-      id: savedConversation.id,
-      scenario: savedConversation.scenario,
-      messages: savedConversation.messages,
-      created_at: savedConversation.created_at
-    });
-  } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
-  }
-}
-
-export async function sendMessage(req: Request, res: Response) {
-  try {
-    const { conversation_id, message, is_voice } = messageSchema.parse(req.body);
-    const user = (req as any).user!;
-
-    const conversation = await conversationRepository.findOne({
-      where: { id: conversation_id, user_id: user.id }
-    });
-
-    if (!conversation) {
-      return res.status(404).json({ error: 'Conversation not found' });
+    if (!lesson_id) {
+      return res.status(400).json({ error: 'lesson_id is required' });
     }
 
-    const userMessage: Message = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content: message,
-      timestamp: new Date()
-    };
-
-    conversation.messages.push(userMessage);
-
-    const aiMessages = conversation.messages.map(m => ({
-      role: m.role,
-      content: m.content
-    }));
-
-    const aiResponse = await generateResponse(aiMessages, conversation.scenario, user.target_language);
-
-    const assistantMessage: Message = {
-      id: crypto.randomUUID(),
-      role: 'assistant',
-      content: aiResponse,
-      timestamp: new Date()
-    };
-
-    conversation.messages.push(assistantMessage);
-    await conversationRepository.save(conversation);
-
-    const analysis = await analyzeConversation(aiMessages.concat([{ role: 'assistant', content: aiResponse }]), user.target_language);
-
-    res.status(200).json({
-      conversation_id: conversation.id,
-      user_message: userMessage,
-      ai_message: assistantMessage,
-      feedback: {
-        correction: analysis.correction,
-        suggestion: analysis.suggestion,
-        score: analysis.score
-      }
-    });
+    const session = await createConversation(lesson_id, userId);
+    res.json(session);
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    console.error('Error creating conversation:', error);
+    res.status(500).json({ error: 'Failed to create conversation' });
   }
 }
 
-export async function getConversationHistory(req: Request, res: Response) {
-  try {
-    const user = (req as any).user!;
-    const conversations = await conversationRepository.find({
-      where: { user_id: user.id },
-      order: { created_at: 'DESC' }
-    });
-
-    res.status(200).json(conversations);
-  } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
-  }
-}
-
-export async function getConversation(req: Request, res: Response) {
+export async function getConversationHandler(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const user = (req as any).user!;
+    const session = await getConversationById(id);
 
-    const conversation = await conversationRepository.findOne({
-      where: { id, user_id: user.id }
-    });
-
-    if (!conversation) {
+    if (!session) {
       return res.status(404).json({ error: 'Conversation not found' });
     }
 
-    res.status(200).json(conversation);
+    res.json(session);
   } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
+    console.error('Error getting conversation:', error);
+    res.status(500).json({ error: 'Failed to get conversation' });
   }
 }
 
-export async function getScenarios(req: Request, res: Response) {
-  const scenarios = [
-    { id: 'daily', name: '日常对话', description: '购物、点餐、问路、就医等日常场景' },
-    { id: 'business', name: '商务场景', description: '会议、谈判、邮件沟通、面试' },
-    { id: 'travel', name: '旅行场景', description: '订酒店、问路、景点介绍、交通' },
-    { id: 'exam', name: '考试场景', description: '模拟语言考试对话练习' }
-  ];
+export async function getConversationHistoryHandler(req: Request, res: Response) {
+  try {
+    const userId = (req as any).user?.id;
+    const limit = parseInt(req.query.limit as string) || 20;
 
-  res.status(200).json(scenarios);
+    const sessions = await getConversationHistory(userId, limit);
+    res.json(sessions);
+  } catch (error) {
+    console.error('Error getting conversation history:', error);
+    res.status(500).json({ error: 'Failed to get conversation history' });
+  }
+}
+
+export async function sendMessageHandler(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ error: 'content is required' });
+    }
+
+    const session = await getConversationById(id);
+    if (!session) {
+      return res.status(404).json({ error: 'Conversation not found' });
+    }
+
+    if (session.status !== 'active') {
+      return res.status(400).json({ error: 'Conversation is not active' });
+    }
+
+    const messages = await sendMessage(id, content);
+    res.json({ messages });
+  } catch (error) {
+    console.error('Error sending message:', error);
+    res.status(500).json({ error: 'Failed to send message' });
+  }
+}
+
+export async function getMessagesHandler(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    const messages = await getConversationMessages(id);
+    res.json(messages);
+  } catch (error) {
+    console.error('Error getting messages:', error);
+    res.status(500).json({ error: 'Failed to get messages' });
+  }
+}
+
+export async function completeConversationHandler(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    const { score } = req.body;
+
+    const session = await getConversationById(id);
+    if (!session) {
+      return res.status(404).json({ error: 'Conversation not found' });
+    }
+
+    // Calculate score if not provided
+    const finalScore = score ?? (async () => {
+      const messages = await getConversationMessages(id);
+      return calculateScore(messages);
+    })();
+
+    const completedSession = await completeConversation(id, await finalScore);
+    res.json(completedSession);
+  } catch (error) {
+    console.error('Error completing conversation:', error);
+    res.status(500).json({ error: 'Failed to complete conversation' });
+  }
+}
+
+export async function abandonConversationHandler(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    const session = await abandonConversation(id);
+    res.json(session);
+  } catch (error) {
+    console.error('Error abandoning conversation:', error);
+    res.status(500).json({ error: 'Failed to abandon conversation' });
+  }
 }

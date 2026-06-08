@@ -127,3 +127,338 @@ export const courseAPI = {
   completeLesson: (id: string, lessonId: string) => 
     fetchAPI(`/courses/${id}/lessons/${lessonId}/complete`, { method: 'PUT' }),
 };
+
+export interface ConversationMessage {
+  id: string;
+  session_id: string;
+  role: 'user' | 'ai';
+  content: string;
+  created_at: string;
+}
+
+export interface ConversationSession {
+  id: string;
+  lesson_id: string;
+  user_id: string;
+  score?: number;
+  status: 'active' | 'completed' | 'abandoned';
+  started_at: string;
+  completed_at?: string;
+}
+
+export const conversationAPI = {
+  createConversation: (lessonId: string) =>
+    fetchAPI('/conversations', {
+      method: 'POST',
+      body: JSON.stringify({ lesson_id: lessonId }),
+    }),
+
+  getConversation: (id: string) =>
+    fetchAPI(`/conversations/${id}`),
+
+  getConversationHistory: (limit?: number) =>
+    fetchAPI(`/conversations/history/me${limit ? `?limit=${limit}` : ''}`),
+
+  sendMessage: (id: string, content: string) =>
+    fetchAPI(`/conversations/${id}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ content }),
+    }),
+
+  getMessages: (id: string) =>
+    fetchAPI(`/conversations/${id}/messages`),
+
+  completeConversation: (id: string, score?: number) =>
+    fetchAPI(`/conversations/${id}/complete`, {
+      method: 'PUT',
+      body: JSON.stringify({ score }),
+    }),
+
+  abandonConversation: (id: string) =>
+    fetchAPI(`/conversations/${id}`, { method: 'DELETE' }),
+};
+
+export interface GamificationProfile {
+  xp: number;
+  level: number;
+  title: string;
+  streak_days: number;
+  weekly_xp: number;
+  monthly_xp: number;
+  last_check_in: string | null;
+  achievements_unlocked: number;
+  total_achievements: number;
+}
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: string;
+  xp_reward: number;
+  unlocked: boolean;
+  unlocked_at: string | null;
+}
+
+export interface DailyQuest {
+  id: string;
+  name: string;
+  description: string;
+  type: string;
+  target_value: number;
+  xp_reward: number;
+  progress: number;
+  completed: boolean;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  user_id: string;
+  username: string;
+  avatar_url: string | null;
+  xp: number;
+}
+
+export interface CheckInResult {
+  success: boolean;
+  xp_earned: number;
+  streak_days: number;
+  message: string;
+}
+
+export const gamificationAPI = {
+  checkIn: (): Promise<CheckInResult> =>
+    fetchAPI('/gamification/check-in', { method: 'POST' }),
+
+  getProfile: (): Promise<GamificationProfile> =>
+    fetchAPI('/gamification/profile'),
+
+  getAchievements: (): Promise<Achievement[]> =>
+    fetchAPI('/gamification/achievements'),
+
+  getDailyQuests: (): Promise<DailyQuest[]> =>
+    fetchAPI('/gamification/daily-quests'),
+
+  getWeeklyLeaderboard: (): Promise<LeaderboardEntry[]> =>
+    fetchAPI('/gamification/leaderboard/weekly'),
+
+  getMonthlyLeaderboard: (): Promise<LeaderboardEntry[]> =>
+    fetchAPI('/gamification/leaderboard/monthly'),
+};
+
+export interface LearningGoal {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string;
+  goal_type: 'short_term' | 'medium_term' | 'long_term';
+  target_date: string | null;
+  status: 'active' | 'completed' | 'abandoned';
+  progress: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LearningPath {
+  id: string;
+  user_id: string;
+  goal_id: string | null;
+  course_order: string[];
+  current_position: number;
+  status: 'active' | 'completed' | 'abandoned';
+  courses?: any[];
+  completed_count?: number;
+  total_count?: number;
+  progress_percentage?: number;
+}
+
+export interface CourseRecommendation {
+  course: any;
+  score: number;
+  reason: string;
+}
+
+export const learningAPI = {
+  createGoal: (data: { title: string; description?: string; goal_type: string; target_date?: string }) =>
+    fetchAPI('/learning/goals', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  getGoals: (): Promise<LearningGoal[]> =>
+    fetchAPI('/learning/goals'),
+
+  updateGoal: (id: string, data: Partial<{ title: string; description: string; goal_type: string; target_date: string; progress: number }>) =>
+    fetchAPI(`/learning/goals/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  deleteGoal: (id: string) =>
+    fetchAPI(`/learning/goals/${id}`, { method: 'DELETE' }),
+
+  getLearningPath: (): Promise<LearningPath> =>
+    fetchAPI('/learning/path'),
+
+  generatePath: (goalId?: string) =>
+    fetchAPI('/learning/path/generate', {
+      method: 'POST',
+      body: JSON.stringify({ goal_id: goalId }),
+    }),
+
+  updatePathProgress: (position: number) =>
+    fetchAPI('/learning/path/progress', {
+      method: 'PUT',
+      body: JSON.stringify({ position }),
+    }),
+
+  skipCourse: (courseId: string) =>
+    fetchAPI('/learning/path/skip', {
+      method: 'POST',
+      body: JSON.stringify({ course_id: courseId }),
+    }),
+
+  getRecommendations: (limit?: number): Promise<CourseRecommendation[]> =>
+    fetchAPI(`/learning/recommendations${limit ? `?limit=${limit}` : ''}`),
+
+  getNextCourse: (): Promise<any> =>
+    fetchAPI('/learning/recommendations/next'),
+
+  recordSkipped: (courseId: string) =>
+    fetchAPI('/learning/recommendations/skip', {
+      method: 'POST',
+      body: JSON.stringify({ course_id: courseId }),
+    }),
+
+  recordCompleted: (courseId: string) =>
+    fetchAPI('/learning/recommendations/complete', {
+      method: 'POST',
+      body: JSON.stringify({ course_id: courseId }),
+    }),
+};
+
+export interface VocabularyCard {
+  id: string;
+  user_id: string;
+  front: string;
+  back: string;
+  example?: string;
+  mastery_level: 'new' | 'learning' | 'familiar' | 'known' | 'mastered';
+  ease_factor: number;
+  interval: number;
+  repetitions: number;
+  next_review: string;
+  review_count: number;
+  correct_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VocabularyDeck {
+  id: string;
+  user_id: string;
+  name: string;
+  description?: string;
+  is_auto: boolean;
+  course_id?: string;
+  card_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReviewLog {
+  id: string;
+  user_id: string;
+  card_id: string;
+  quality: number;
+  ease_factor_before: number;
+  ease_factor_after: number;
+  interval_before: number;
+  interval_after: number;
+  next_review_after: string;
+  reviewed_at: string;
+  card?: VocabularyCard;
+}
+
+export interface ReviewStats {
+  totalReviews: number;
+  correctCount: number;
+  streakDays: number;
+}
+
+export type MasteryStats = Record<'new' | 'learning' | 'familiar' | 'known' | 'mastered', number>;
+
+export const vocabularyAPI = {
+  getCards: (): Promise<VocabularyCard[]> =>
+    fetchAPI('/vocabulary/cards'),
+
+  getDueCards: (limit?: number): Promise<VocabularyCard[]> =>
+    fetchAPI(`/vocabulary/cards/due${limit ? `?limit=${limit}` : ''}`),
+
+  getCard: (id: string): Promise<VocabularyCard> =>
+    fetchAPI(`/vocabulary/cards/${id}`),
+
+  createCard: (data: { front: string; back: string; example?: string; deckId?: string }): Promise<VocabularyCard> =>
+    fetchAPI('/vocabulary/cards', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updateCard: (id: string, data: Partial<{ front: string; back: string; example?: string }>): Promise<VocabularyCard> =>
+    fetchAPI(`/vocabulary/cards/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  deleteCard: (id: string): Promise<void> =>
+    fetchAPI(`/vocabulary/cards/${id}`, { method: 'DELETE' }),
+
+  reviewCard: (id: string, quality: number): Promise<VocabularyCard> =>
+    fetchAPI(`/vocabulary/cards/${id}/review`, {
+      method: 'POST',
+      body: JSON.stringify({ quality }),
+    }),
+
+  getCardReviews: (cardId: string): Promise<ReviewLog[]> =>
+    fetchAPI(`/vocabulary/cards/${cardId}/reviews`),
+
+  getMasteryStats: (): Promise<MasteryStats> =>
+    fetchAPI('/vocabulary/cards/stats/mastery'),
+
+  getDecks: (): Promise<VocabularyDeck[]> =>
+    fetchAPI('/vocabulary/decks'),
+
+  getDeck: (id: string): Promise<VocabularyDeck> =>
+    fetchAPI(`/vocabulary/decks/${id}`),
+
+  createDeck: (data: { name: string; description?: string; isAuto?: boolean; courseId?: string }): Promise<VocabularyDeck> =>
+    fetchAPI('/vocabulary/decks', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updateDeck: (id: string, data: Partial<{ name: string; description?: string }>): Promise<VocabularyDeck> =>
+    fetchAPI(`/vocabulary/decks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  deleteDeck: (id: string): Promise<void> =>
+    fetchAPI(`/vocabulary/decks/${id}`, { method: 'DELETE' }),
+
+  getDeckCards: (deckId: string): Promise<VocabularyCard[]> =>
+    fetchAPI(`/vocabulary/decks/${deckId}/cards`),
+
+  addCardToDeck: (deckId: string, cardId: string): Promise<{ success: boolean }> =>
+    fetchAPI(`/vocabulary/decks/${deckId}/cards/${cardId}`, { method: 'POST' }),
+
+  removeCardFromDeck: (deckId: string, cardId: string): Promise<void> =>
+    fetchAPI(`/vocabulary/decks/${deckId}/cards/${cardId}`, { method: 'DELETE' }),
+
+  getReviewHistory: (limit?: number): Promise<ReviewLog[]> =>
+    fetchAPI(`/vocabulary/reviews/history${limit ? `?limit=${limit}` : ''}`),
+
+  getReviewStats: (days?: number): Promise<ReviewStats> =>
+    fetchAPI(`/vocabulary/reviews/stats${days ? `?days=${days}` : ''}`),
+};

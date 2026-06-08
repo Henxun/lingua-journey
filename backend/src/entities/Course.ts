@@ -33,6 +33,9 @@ export class Course {
   @Column({ default: true })
   is_active: boolean;
 
+  @Column({ type: 'float', default: 0 })
+  recommendation_weight: number;
+
   @OneToMany(() => Lesson, lesson => lesson.course, { cascade: true })
   lessons: Lesson[];
 

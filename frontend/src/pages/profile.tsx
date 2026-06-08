@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
 import { authAPI, courseAPI } from '../lib/api';
+import { motion } from 'framer-motion';
 
 type UserProfile = {
   id: string;
@@ -46,6 +47,23 @@ const languages = [
   { value: 'fr', label: 'Français (French)' },
   { value: 'de', label: 'Deutsch (German)' },
 ];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.5 }
+  }
+};
 
 export default function Profile() {
   const router = useRouter();
@@ -146,8 +164,12 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full"
+        />
       </div>
     );
   }
@@ -157,229 +179,327 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-12 px-4">
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-white">Profile Settings</h1>
-              <button
-                onClick={() => router.push('/')}
-                className="text-white/80 hover:text-white"
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-16 px-4">
+      <div className="max-w-4xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="inline-block">
+            <button
+              onClick={() => router.push('/')}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-2xl text-gray-700 font-semibold hover:bg-white transition-all shadow-lg border border-gray-100"
+            >
+              ← Back Home
+            </button>
+          </motion.div>
+        </motion.div>
+
+        <motion.div
+          className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/60"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 px-10 py-8">
+            <div className="flex items-center gap-6">
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                className="w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-4xl font-black text-white shadow-xl"
               >
-                ← Back
-              </button>
+                {profile.username[0].toUpperCase()}
+              </motion.div>
+              <div>
+                <h1 className="text-3xl font-black text-white mb-2">{profile.username}</h1>
+                <p className="text-blue-100 text-lg">{profile.email}</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="px-4 py-1 bg-white/20 backdrop-blur rounded-full text-white font-semibold">
+                    Level {profile.level}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
           
-          <div className="px-8 py-6">
+          <div className="px-10 py-8">
             {message && (
-              <div className={`p-4 rounded-lg mb-6 ${
-                message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-              }`}>
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`p-6 rounded-2xl mb-8 ${
+                  message.type === 'success' 
+                    ? 'bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border border-green-200' 
+                    : 'bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border border-red-200'
+                } font-semibold text-center`}
+              >
+                {message.type === 'success' ? '✅ ' : '❌ '}
                 {message.text}
-              </div>
+              </motion.div>
             )}
 
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-2xl font-bold text-white">
-                {profile.username[0].toUpperCase()}
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">{profile.username}</h2>
-                <p className="text-gray-600">{profile.email}</p>
-                <p className="text-sm text-gray-500">Level {profile.level}</p>
-              </div>
-            </div>
-
             {myCourses.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">My Courses</h3>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="mb-10"
+              >
+                <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                  📚 My Learning Courses
+                </h3>
                 <div className="grid gap-4">
-                  {myCourses.map((progress) => {
+                  {myCourses.map((progress, index) => {
                     const totalLessons = progress.course.lessons?.length || 0;
                     const completedLessons = progress.completed_lessons?.length || 0;
                     const percentage = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
                     return (
-                      <div
+                      <motion.div
                         key={progress.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.25 + index * 0.05 }}
+                        whileHover={{ x: 5, scale: 1.02 }}
                         onClick={() => router.push(`/courses/${progress.course_id}`)}
-                        className="bg-gray-50 rounded-xl p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+                        className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 cursor-pointer hover:from-blue-100 hover:to-indigo-100 transition-all border border-blue-100 shadow-md hover:shadow-xl"
                       >
-                        <div className="flex justify-between items-center mb-2">
-                          <h4 className="font-semibold text-gray-900">{progress.course.name}</h4>
-                          <span className="text-sm text-blue-600">{percentage}% complete</span>
+                        <div className="flex justify-between items-center mb-4">
+                          <h4 className="text-xl font-bold text-gray-900">{progress.course.name}</h4>
+                          <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                            {percentage}% complete
+                          </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                          <div
-                            className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full"
-                            style={{ width: `${percentage}%` }}
-                          ></div>
+                        <div className="w-full bg-gray-200 rounded-full h-3 mb-4 overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${percentage}%` }}
+                            transition={{ duration: 1, delay: 0.3 }}
+                            className="bg-gradient-to-r from-blue-500 to-indigo-500 h-3 rounded-full shadow-lg"
+                          ></motion.div>
                         </div>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-base text-gray-600 font-medium">
                           {progress.completed_at ? (
-                            <span className="text-green-600">✓ Completed</span>
+                            <span className="text-green-600 flex items-center gap-2">
+                              ✓ Completed! 🎉
+                            </span>
                           ) : (
-                            <span>In Progress</span>
+                            <span className="flex items-center gap-2">
+                              In Progress 💪
+                            </span>
                           )}
                         </p>
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {!editing ? (
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-gray-50 rounded-xl">
-                    <label className="text-sm font-medium text-gray-500">Native Language</label>
-                    <p className="text-gray-900 mt-1">
+              <motion.div
+                className="space-y-6"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="p-6 bg-gradient-to-br from-gray-50 to-slate-50 rounded-2xl border border-gray-100">
+                    <label className="text-sm font-bold text-gray-500 uppercase tracking-wide">Native Language</label>
+                    <p className="text-xl font-bold text-gray-900 mt-2">
                       {languages.find(l => l.value === profile.native_language)?.label || profile.native_language}
                     </p>
                   </div>
-                  <div className="p-4 bg-gray-50 rounded-xl">
-                    <label className="text-sm font-medium text-gray-500">Target Language</label>
-                    <p className="text-gray-900 mt-1">
+                  <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100">
+                    <label className="text-sm font-bold text-blue-600 uppercase tracking-wide">Learning Language</label>
+                    <p className="text-xl font-bold text-blue-900 mt-2">
                       {languages.find(l => l.value === profile.target_language)?.label || profile.target_language}
                     </p>
                   </div>
-                </div>
+                </motion.div>
 
-                <div className="p-4 bg-gray-50 rounded-xl">
-                  <label className="text-sm font-medium text-gray-500">Email Verified</label>
-                  <p className="text-gray-900 mt-1 flex items-center gap-2">
+                <motion.div variants={itemVariants} className="p-6 bg-gradient-to-br from-gray-50 to-slate-50 rounded-2xl border border-gray-100">
+                  <label className="text-sm font-bold text-gray-500 uppercase tracking-wide">Email Status</label>
+                  <p className="text-xl font-bold text-gray-900 mt-2 flex items-center gap-2">
                     {profile.email_verified ? (
-                      <span className="text-green-600">✓ Verified</span>
+                      <span className="text-green-600 flex items-center gap-2">✓ Verified ✨</span>
                     ) : (
-                      <span className="text-orange-600">✗ Not Verified</span>
+                      <span className="text-orange-600 flex items-center gap-2">✗ Not Verified ⚠️</span>
                     )}
                   </p>
-                </div>
+                </motion.div>
 
                 {profile.oauth_profiles && Object.keys(profile.oauth_profiles).length > 0 && (
-                  <div className="p-4 bg-gray-50 rounded-xl">
-                    <label className="text-sm font-medium text-gray-500 mb-3 block">Linked Accounts</label>
-                    <div className="space-y-2">
+                  <motion.div variants={itemVariants} className="p-6 bg-gradient-to-br from-gray-50 to-slate-50 rounded-2xl border border-gray-100">
+                    <label className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 block">Linked Accounts</label>
+                    <div className="space-y-3">
                       {Object.entries(profile.oauth_profiles).map(([provider, data]: [string, any]) => (
-                        <div key={provider} className="flex items-center justify-between p-2 bg-white rounded-lg">
-                          <span className="capitalize">{provider}</span>
+                        <div key={provider} className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100">
+                          <span className="capitalize font-bold text-gray-800">{provider}</span>
                           <button
                             onClick={() => handleUnlinkOAuth(provider)}
-                            className="text-red-600 hover:text-red-700 text-sm"
+                            className="text-red-600 hover:text-red-700 text-sm font-semibold px-4 py-2 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
                           >
                             Unlink
                           </button>
                         </div>
                       ))}
                     </div>
-                  </div>
+                  </motion.div>
                 )}
 
-                <div className="flex gap-3">
-                  <button
+                <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 pt-2">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => router.push('/profile/stats')}
-                    className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-xl font-medium hover:from-green-700 hover:to-emerald-700 transition-colors"
+                    className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:from-green-600 hover:to-emerald-700 transition-all shadow-xl shadow-green-500/30"
                   >
-                    View Learning Stats
-                  </button>
-                  <button
+                    📈 View Learning Stats
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => router.push('/profile/gamification')}
+                    className="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:from-purple-600 hover:to-indigo-700 transition-all shadow-xl shadow-purple-500/30"
+                  >
+                    🎮 Game Center
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => router.push('/profile/learning-path')}
+                    className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:from-orange-600 hover:to-red-700 transition-all shadow-xl shadow-orange-500/30"
+                  >
+                    🛤️ Learning Path
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => router.push('/vocabulary')}
+                    className="flex-1 bg-gradient-to-r from-pink-500 to-rose-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:from-pink-600 hover:to-rose-700 transition-all shadow-xl shadow-pink-500/30"
+                  >
+                    📝 Vocabulary
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => setEditing(true)}
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-colors"
+                    className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-indigo-700 transition-all shadow-xl shadow-blue-500/30"
                   >
-                    Edit Profile
-                  </button>
-                  <button
+                    ✏️ Edit Profile
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={logout}
-                    className="px-4 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="px-8 py-4 bg-gradient-to-r from-gray-100 to-slate-100 text-gray-700 rounded-2xl font-bold text-lg hover:from-gray-200 hover:to-slate-200 transition-all border border-gray-200 shadow-lg"
                   >
-                    Logout
-                  </button>
-                </div>
+                    👋 Logout
+                  </motion.button>
+                </motion.div>
 
                 {profile.auth_provider === 'email' && (
-                  <>
+                  <motion.div variants={itemVariants} className="pt-4">
                     {profile.has_password ? (
-                      <button
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => setShowPasswordForm(!showPasswordForm)}
-                        className="text-blue-600 hover:text-blue-700 font-medium"
+                        className="text-blue-600 hover:text-blue-700 font-bold text-lg"
                       >
-                        {showPasswordForm ? 'Cancel' : 'Change Password'}
-                      </button>
+                        {showPasswordForm ? '↩️ Cancel' : '🔑 Change Password'}
+                      </motion.button>
                     ) : (
-                      <button
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => router.push('/profile/settings')}
-                        className="text-green-600 hover:text-green-700 font-medium"
+                        className="text-green-600 hover:text-green-700 font-bold text-lg"
                       >
                         Set up password →
-                      </button>
+                      </motion.button>
                     )}
-                  </>
+                  </motion.div>
                 )}
 
                 {profile.auth_provider !== 'email' && !profile.has_password && (
-                  <button
-                    onClick={() => router.push('/profile/settings')}
-                    className="text-green-600 hover:text-green-700 font-medium"
-                  >
-                    Set up password →
-                  </button>
+                  <motion.div variants={itemVariants} className="pt-4">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => router.push('/profile/settings')}
+                      className="text-green-600 hover:text-green-700 font-bold text-lg"
+                    >
+                      Set up password →
+                    </motion.button>
+                  </motion.div>
                 )}
 
                 {showPasswordForm && (
-                  <form onSubmit={handleChangePassword} className="mt-6 space-y-4 border-t pt-6">
+                  <motion.form
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    onSubmit={handleChangePassword}
+                    className="mt-8 space-y-6 border-t-2 border-gray-100 pt-8"
+                  >
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+                      <label className="block text-base font-bold text-gray-700 mb-3">Current Password</label>
                       <input
                         type="password"
                         value={passwordData.old_password}
                         onChange={(e) => setPasswordData({ ...passwordData, old_password: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all text-lg font-medium"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                      <label className="block text-base font-bold text-gray-700 mb-3">New Password</label>
                       <input
                         type="password"
                         value={passwordData.new_password}
                         onChange={(e) => setPasswordData({ ...passwordData, new_password: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all text-lg font-medium"
                         required
                         minLength={6}
                       />
                     </div>
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       type="submit"
                       disabled={saving}
-                      className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-colors disabled:opacity-50"
+                      className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-indigo-700 transition-all disabled:opacity-50 shadow-xl shadow-blue-500/30"
                     >
-                      {saving ? 'Changing...' : 'Change Password'}
-                    </button>
-                  </form>
+                      {saving ? '🔄 Changing...' : '🔑 Change Password'}
+                    </motion.button>
+                  </motion.form>
                 )}
-              </div>
+              </motion.div>
             ) : (
-              <form onSubmit={handleSaveProfile} className="space-y-4">
+              <motion.form
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                onSubmit={handleSaveProfile}
+                className="space-y-6"
+              >
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                  <label className="block text-base font-bold text-gray-700 mb-3">Username</label>
                   <input
                     type="text"
                     value={formData.username}
                     onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all text-lg font-medium"
                     required
                     minLength={3}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Native Language</label>
+                    <label className="block text-base font-bold text-gray-700 mb-3">Native Language</label>
                     <select
                       value={formData.native_language}
                       onChange={(e) => setFormData({ ...formData, native_language: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all text-lg font-medium"
                     >
                       {languages.map((lang) => (
                         <option key={lang.value} value={lang.value}>{lang.label}</option>
@@ -387,11 +507,11 @@ export default function Profile() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Target Language</label>
+                    <label className="block text-base font-bold text-gray-700 mb-3">Target Language</label>
                     <select
                       value={formData.target_language}
                       onChange={(e) => setFormData({ ...formData, target_language: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all text-lg font-medium"
                     >
                       {languages.map((lang) => (
                         <option key={lang.value} value={lang.value}>{lang.label}</option>
@@ -399,15 +519,19 @@ export default function Profile() {
                     </select>
                   </div>
                 </div>
-                <div className="flex gap-3">
-                  <button
+                <div className="flex gap-4 pt-4">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     type="submit"
                     disabled={saving}
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-colors disabled:opacity-50"
+                    className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-4 px-6 rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-indigo-700 transition-all disabled:opacity-50 shadow-xl shadow-blue-500/30"
                   >
-                    {saving ? 'Saving...' : 'Save Changes'}
-                  </button>
-                  <button
+                    {saving ? '🔄 Saving...' : '✅ Save Changes'}
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     type="button"
                     onClick={() => {
                       setEditing(false);
@@ -418,15 +542,15 @@ export default function Profile() {
                         avatar_url: profile.avatar_url || '',
                       });
                     }}
-                    className="px-4 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="px-8 py-4 bg-gradient-to-r from-gray-100 to-slate-100 text-gray-700 rounded-2xl font-bold text-lg hover:from-gray-200 hover:to-slate-200 transition-all border border-gray-200 shadow-lg"
                   >
-                    Cancel
-                  </button>
+                    ↩️ Cancel
+                  </motion.button>
                 </div>
-              </form>
+              </motion.form>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
