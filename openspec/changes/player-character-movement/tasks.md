@@ -32,7 +32,7 @@
 - [x] 5.1 Add interaction prompt component ("Press SPACE to talk to {name}")
 - [x] 5.2 Show prompt only when `isInRange` is true
 - [x] 5.3 Style prompt with floating card design
-- [ ] 5.4 Add visual highlight effect to nearest NPC (deferred - not critical)
+- [x] 5.4 Add visual highlight effect to nearest NPC (via selected state)
 
 ## 6. Implement Space Key Trigger
 
