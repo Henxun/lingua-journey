@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, RefObject } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -13,30 +13,27 @@ const BOUNDS = {
 // Movement speed in units per second
 const MOVE_SPEED = 5;
 
-// Initial player position
-const INITIAL_POSITION: [number, number, number] = [0, 0, 0];
+// Camera height (first-person view)
+const CAMERA_HEIGHT = 1.7;
 
 export interface UsePlayerControlsOptions {
   enabled?: boolean;
 }
 
 export interface UsePlayerControlsReturn {
-  keys: RefObject<{
+  keys: React.RefObject<{
     forward: boolean;
     backward: boolean;
     left: boolean;
     right: boolean;
   }>;
-  playerPosition: RefObject<THREE.Vector3>;
+  playerPosition: React.RefObject<THREE.Vector3>;
   isLocked: boolean;
 }
 
 /**
  * Hook for player character movement using WASD keys.
- * Movement is relative to camera direction using quaternion.
- * 
- * Gets camera from useThree() internally.
- * @returns keys ref, playerPosition ref, and isLocked state
+ * Updates both player position and camera position for first-person mode.
  */
 export function usePlayerControls({ enabled = true }: UsePlayerControlsOptions = {}): UsePlayerControlsReturn {
   const { camera } = useThree();
@@ -49,20 +46,23 @@ export function usePlayerControls({ enabled = true }: UsePlayerControlsOptions =
     right: false,
   });
 
-  // Player position
-  const playerPosition = useRef(new THREE.Vector3(...INITIAL_POSITION));
+  // Player position (reference to share with camera)
+  const playerPosition = useRef(new THREE.Vector3(0, CAMERA_HEIGHT, 4));
 
   // Pointer lock state
   const [isLocked, setIsLocked] = useState(false);
 
-  // Temporary vectors for calculations (to avoid allocations in useFrame)
+  // Temporary vectors for calculations
   const moveDirection = useRef(new THREE.Vector3());
-  const cameraDirection = useRef(new THREE.Vector3());
   const frontVector = useRef(new THREE.Vector3());
   const sideVector = useRef(new THREE.Vector3());
 
   // Handle key down
   const handleKeyDown = (event: KeyboardEvent) => {
+    // Don't handle if user is typing in an input
+    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+      return;
+    }
     switch (event.code) {
       case 'KeyW':
       case 'ArrowUp':
@@ -123,25 +123,34 @@ export function usePlayerControls({ enabled = true }: UsePlayerControlsOptions =
     };
   }, []);
 
-  // Update player position in useFrame
+  // Update player and camera position in useFrame
   useFrame((_state, delta) => {
     if (!camera) return;
-    
-    // Don't move if movement is disabled (e.g., during voice chat)
-    if (!enabled) return;
+
+    // Only move if movement is enabled AND pointer lock is active
+    if (!enabled || !isLocked) {
+      // Still update camera to player position when locked
+      if (isLocked) {
+        camera.position.copy(playerPosition.current);
+      }
+      return;
+    }
 
     // Only move if any movement key is pressed
     const { forward, backward, left, right } = keys.current;
-    if (!forward && !backward && !left && !right) return;
+    if (!forward && !backward && !left && !right) {
+      // Still sync camera to player position even when not moving
+      camera.position.copy(playerPosition.current);
+      return;
+    }
 
-    // Get camera direction (forward vector)
-    camera.getWorldDirection(cameraDirection.current);
+    // Get camera's forward direction (ignore Y component)
+    const cameraDirection = new THREE.Vector3();
+    camera.getWorldDirection(cameraDirection);
+    cameraDirection.y = 0;
+    cameraDirection.normalize();
 
-    // Project camera direction onto XZ plane (ignore Y component)
-    cameraDirection.current.y = 0;
-    cameraDirection.current.normalize();
-
-    // Calculate movement direction
+    // Calculate movement direction based on camera facing
     frontVector.current.set(0, 0, Number(backward) - Number(forward));
     sideVector.current.set(Number(left) - Number(right), 0, 0);
 
@@ -155,15 +164,16 @@ export function usePlayerControls({ enabled = true }: UsePlayerControlsOptions =
       moveDirection.current.normalize();
     }
 
-    // Apply camera rotation to movement direction
-    // We need to rotate moveDirection by the camera's Y rotation
-    const cameraQuaternion = camera.quaternion;
-    moveDirection.current.applyQuaternion(cameraQuaternion);
+    // Rotate movement direction by camera's Y rotation
+    moveDirection.current.applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.atan2(
+      cameraDirection.x,
+      cameraDirection.z
+    ));
 
     // Calculate distance to move this frame
     const distance = MOVE_SPEED * delta;
 
-    // Update position
+    // Update player position
     playerPosition.current.x += moveDirection.current.x * distance;
     playerPosition.current.z += moveDirection.current.z * distance;
 
@@ -171,8 +181,11 @@ export function usePlayerControls({ enabled = true }: UsePlayerControlsOptions =
     playerPosition.current.x = Math.max(BOUNDS.minX, Math.min(BOUNDS.maxX, playerPosition.current.x));
     playerPosition.current.z = Math.max(BOUNDS.minZ, Math.min(BOUNDS.maxZ, playerPosition.current.z));
 
-    // Y position stays at 0 (ground plane)
-    playerPosition.current.y = 0;
+    // Keep camera at fixed height (first-person view)
+    playerPosition.current.y = CAMERA_HEIGHT;
+
+    // Update camera position to match player position (first-person mode)
+    camera.position.copy(playerPosition.current);
   });
 
   return {

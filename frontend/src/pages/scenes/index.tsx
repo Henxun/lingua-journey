@@ -535,6 +535,7 @@ interface Scene3DProps {
   isConnected: boolean;
   isRecording: boolean;
   isPlaying: boolean;
+  isLocked: boolean;
 }
 
 function Scene3D({
@@ -545,14 +546,18 @@ function Scene3D({
   isConnected,
   isRecording,
   isPlaying,
+  isLocked,
 }: Scene3DProps) {
   return (
     <>
-      <PerspectiveCamera makeDefault position={[6, 5, 7]} fov={50} />
+      {/* Camera - position set by usePlayerControls in first-person mode */}
+      <PerspectiveCamera makeDefault position={[0, 1.7, 4]} fov={50} />
+      {/* OrbitControls disabled when PointerLock is active */}
       <OrbitControls
-        enablePan={true}
-        enableZoom={true}
-        enableRotate={true}
+        enabled={!isLocked}
+        enablePan={!isLocked}
+        enableZoom={!isLocked}
+        enableRotate={!isLocked}
         minDistance={3}
         maxDistance={20}
         target={[0, 0.8, 0]}
@@ -1155,6 +1160,7 @@ export default function ScenesPage() {
                     isConnected={isConnected}
                     isRecording={isRecording}
                     isPlaying={isPlaying}
+                    isLocked={isLocked}
                   />
                   <PlayerControlsWrapper
                     isChatting={isChatting}
