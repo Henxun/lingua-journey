@@ -1,9 +1,13 @@
 import Head from 'next/head'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/contexts/AuthContext'
 import { motion } from 'framer-motion'
+import { ArrowIcon } from '@/components/ArrowIcon'
+import { Navbar } from '@/components/Navbar'
 
 export default function Home() {
+  const { t } = useTranslation()
   const { user } = useAuth()
 
   const containerVariants = {
@@ -32,8 +36,9 @@ export default function Home() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
         </svg>
       ),
-      title: "AI对话练习",
-      description: "真实场景模拟对话，智能纠错反馈",
+      title: t('home.features.aiDialog.title'),
+      description: t('home.features.aiDialog.description'),
+      href: '/ai-teacher',
       color: "from-blue-500 to-cyan-500",
       bgColor: "bg-blue-50"
     },
@@ -43,8 +48,9 @@ export default function Home() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
         </svg>
       ),
-      title: "AI老师教学",
-      description: "个性化课程推荐，知识点讲解答疑",
+      title: t('home.features.aiTeacher.title'),
+      description: t('home.features.aiTeacher.description'),
+      href: '/ai-teacher',
       color: "from-indigo-500 to-purple-500",
       bgColor: "bg-indigo-50"
     },
@@ -54,73 +60,33 @@ export default function Home() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
         </svg>
       ),
-      title: "3D场景互动",
-      description: "沉浸式3D场景，可交互学习体验",
+      title: t('home.features.scene3d.title'),
+      description: t('home.features.scene3d.description'),
+      href: '/scenes',
       color: "from-purple-500 to-pink-500",
       bgColor: "bg-purple-50"
     }
   ]
 
   const languages = [
-    { name: 'English', emoji: '🇺🇸' },
-    { name: '中文', emoji: '🇨🇳' },
-    { name: '日本語', emoji: '🇯🇵' },
-    { name: '한국어', emoji: '🇰🇷' },
-    { name: 'Español', emoji: '🇪🇸' },
-    { name: 'Français', emoji: '🇫🇷' },
-    { name: 'Deutsch', emoji: '🇩🇪' },
-    { name: 'العربية', emoji: '🇸🇦' },
+    { name: t('home.languages.english') || 'English', emoji: '🇺🇸' },
+    { name: t('home.languages.chinese') || '中文', emoji: '🇨🇳' },
+    { name: t('home.languages.japanese') || '日本語', emoji: '🇯🇵' },
+    { name: t('home.languages.korean') || '한국어', emoji: '🇰🇷' },
+    { name: t('home.languages.spanish') || 'Español', emoji: '🇪🇸' },
+    { name: t('home.languages.french') || 'Français', emoji: '🇫🇷' },
+    { name: t('home.languages.german') || 'Deutsch', emoji: '🇩🇪' },
+    { name: t('home.languages.arabic') || 'العربية', emoji: '🇸🇦' },
   ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <Head>
-        <title>多语种AI在线教育平台 - Lingua Journey</title>
-        <meta name="description" content="沉浸式多语种学习平台，通过AI对话练习提升语言能力" />
+        <title>{t('common.appName')} - AI Language Learning</title>
+        <meta name="description" content={t('home.footer.description')} />
       </Head>
 
-      <nav className="bg-white/70 backdrop-blur-xl shadow-sm border-b border-white/20 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center space-x-3">
-              <motion.div 
-                className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <span className="text-white font-bold text-xl">LJ</span>
-              </motion.div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                Lingua Journey
-              </span>
-            </div>
-            <div className="flex items-center space-x-6">
-              <button className="text-gray-600 hover:text-blue-600 transition-colors font-medium">功能</button>
-              <Link href="/courses" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">课程</Link>
-              <Link href="/vocabulary" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">词汇</Link>
-              <button className="text-gray-600 hover:text-blue-600 transition-colors font-medium">社区</button>
-              {user ? (
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Link href="/profile" className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-medium hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg shadow-blue-500/30">
-                    {user.username}
-                  </Link>
-                </motion.div>
-              ) : (
-                <div className="flex items-center space-x-3">
-                  <Link href="/login" className="px-5 py-2.5 text-gray-700 font-medium hover:text-blue-600 transition-colors">
-                    登录
-                  </Link>
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Link href="/register" className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-medium hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg shadow-blue-500/30">
-                      注册
-                    </Link>
-                  </motion.div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <motion.div 
@@ -132,7 +98,7 @@ export default function Home() {
           <motion.div variants={itemVariants}>
             <div className="inline-flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full text-sm font-semibold text-blue-700 mb-8 shadow-lg border border-blue-100">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-              AI驱动的沉浸式语言学习体验
+              {t('home.hero.subtitle')}
             </div>
           </motion.div>
           
@@ -140,10 +106,10 @@ export default function Home() {
             className="text-5xl md:text-7xl font-black text-gray-900 mb-6 leading-tight"
             variants={itemVariants}
           >
-            在真实场景中
+            {t('home.hero.titleLine1')}
             <br />
             <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              沉浸式学习语言
+              {t('home.hero.titleLine2')}
             </span>
           </motion.h1>
           
@@ -151,8 +117,7 @@ export default function Home() {
             className="text-xl text-gray-600 max-w-3xl mx-auto mb-12 leading-relaxed"
             variants={itemVariants}
           >
-            通过AI模拟真实对话场景，沉浸式学习多语种。从日常对话到商务场景，
-            <br />让语言学习变得更加生动有趣，快速提升你的语言能力。
+            {t('home.hero.description')}
           </motion.p>
           
           <motion.div 
@@ -164,12 +129,12 @@ export default function Home() {
                 href="/courses" 
                 className="px-10 py-5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-indigo-700 transition-all shadow-2xl shadow-blue-500/40"
               >
-                🚀 开始学习
+                {t('home.hero.startLearning')}
               </Link>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <button className="px-10 py-5 bg-white text-gray-700 rounded-2xl font-bold text-lg border-2 border-gray-200 hover:border-blue-500 hover:text-blue-600 transition-all shadow-lg hover:shadow-xl">
-                了解更多 →
+              <button className="px-8 py-4 bg-white text-gray-700 rounded-2xl font-bold text-lg border-2 border-gray-200 hover:border-blue-500 hover:text-blue-600 transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
+                {t('home.hero.learnMore')} <ArrowIcon direction="right" color="primary" />
               </button>
             </motion.div>
           </motion.div>
@@ -179,26 +144,27 @@ export default function Home() {
             variants={containerVariants}
           >
             {features.map((feature, index) => (
-              <motion.div
-                key={feature.title}
-                variants={itemVariants}
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 300 }}
-                className={`${feature.bgColor} rounded-3xl p-8 shadow-xl border border-white/50 backdrop-blur-sm`}
-              >
-                <div className={`w-16 h-16 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-6 text-white shadow-lg`}>
-                  {feature.icon}
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                <p className="text-gray-600 text-lg">{feature.description}</p>
-              </motion.div>
+              <Link key={feature.title} href={feature.href || '/'}>
+                <motion.div
+                  variants={itemVariants}
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                  className={`${feature.bgColor} rounded-3xl p-8 shadow-xl border border-white/50 backdrop-blur-sm cursor-pointer h-full`}
+                >
+                  <div className={`w-16 h-16 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-6 text-white shadow-lg`}>
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">{feature.title}</h3>
+                  <p className="text-gray-600 text-lg">{feature.description}</p>
+                </motion.div>
+              </Link>
             ))}
           </motion.div>
 
           <motion.div variants={itemVariants}>
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-black text-gray-900 mb-4">支持多语种学习</h2>
-              <p className="text-xl text-gray-600">从全球主流语言到小众语种，满足你的学习需求</p>
+              <h2 className="text-4xl font-black text-gray-900 mb-4">{t('home.languages.title')}</h2>
+              <p className="text-xl text-gray-600">{t('home.languages.subtitle')}</p>
             </div>
             <div className="flex flex-wrap justify-center gap-4">
               {languages.map((lang, index) => (
@@ -230,33 +196,33 @@ export default function Home() {
                 </div>
                 <span className="text-xl font-bold">Lingua Journey</span>
               </div>
-              <p className="text-gray-400">沉浸式多语种AI在线教育平台，让语言学习更简单</p>
+              <p className="text-gray-400">{t('home.footer.description')}</p>
             </div>
             <div>
-              <h4 className="text-lg font-bold mb-5 text-gray-200">功能</h4>
+              <h4 className="text-lg font-bold mb-5 text-gray-200">{t('home.footer.features')}</h4>
               <ul className="space-y-3 text-gray-400">
-                <li className="hover:text-white transition-colors cursor-pointer">AI对话练习</li>
-                <li className="hover:text-white transition-colors cursor-pointer">AI老师教学</li>
-                <li className="hover:text-white transition-colors cursor-pointer">语言测评</li>
-                <li className="hover:text-white transition-colors cursor-pointer">词汇记忆</li>
+                <li className="hover:text-white transition-colors cursor-pointer">{t('home.footer.aiDialog')}</li>
+                <li className="hover:text-white transition-colors cursor-pointer">{t('home.footer.aiTeacher')}</li>
+                <li className="hover:text-white transition-colors cursor-pointer">{t('home.footer.assessment')}</li>
+                <li className="hover:text-white transition-colors cursor-pointer">{t('home.footer.vocabulary')}</li>
               </ul>
             </div>
             <div>
-              <h4 className="text-lg font-bold mb-5 text-gray-200">支持语言</h4>
+              <h4 className="text-lg font-bold mb-5 text-gray-200">{t('home.footer.supportedLanguages')}</h4>
               <ul className="space-y-3 text-gray-400">
-                <li className="hover:text-white transition-colors cursor-pointer">英语</li>
-                <li className="hover:text-white transition-colors cursor-pointer">汉语</li>
-                <li className="hover:text-white transition-colors cursor-pointer">日语</li>
-                <li className="hover:text-white transition-colors cursor-pointer">韩语</li>
+                <li className="hover:text-white transition-colors cursor-pointer">{t('home.footer.english')}</li>
+                <li className="hover:text-white transition-colors cursor-pointer">{t('home.footer.chinese')}</li>
+                <li className="hover:text-white transition-colors cursor-pointer">{t('home.footer.japanese')}</li>
+                <li className="hover:text-white transition-colors cursor-pointer">{t('home.footer.korean')}</li>
               </ul>
             </div>
             <div>
-              <h4 className="text-lg font-bold mb-5 text-gray-200">联系我们</h4>
+              <h4 className="text-lg font-bold mb-5 text-gray-200">{t('home.footer.contactUs')}</h4>
               <ul className="space-y-3 text-gray-400">
                 <li className="hover:text-white transition-colors cursor-pointer">support@linguajourney.com</li>
-                <li className="hover:text-white transition-colors cursor-pointer">关于我们</li>
-                <li className="hover:text-white transition-colors cursor-pointer">隐私政策</li>
-                <li className="hover:text-white transition-colors cursor-pointer">服务条款</li>
+                <li className="hover:text-white transition-colors cursor-pointer">{t('home.footer.aboutUs')}</li>
+                <li className="hover:text-white transition-colors cursor-pointer">{t('home.footer.privacyPolicy')}</li>
+                <li className="hover:text-white transition-colors cursor-pointer">{t('home.footer.termsOfService')}</li>
               </ul>
             </div>
           </div>

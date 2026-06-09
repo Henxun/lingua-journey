@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import { useAuth } from '../../contexts/AuthContext';
 import { courseAPI } from '../../lib/api';
+import { Navbar } from '../../components/Navbar';
+import { ArrowIcon } from '@/components/ArrowIcon';
 
 type Lesson = {
   id: string;
@@ -123,23 +126,23 @@ export default function CourseDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        <Navbar />
+        <div className="flex items-center justify-center pt-32">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
       </div>
     );
   }
 
   if (!course) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Course not found</h1>
-          <button
-            onClick={() => router.push('/courses')}
-            className="text-blue-600 hover:text-blue-700 font-medium"
-          >
-            ← Back to courses
-          </button>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        <Navbar />
+        <div className="flex items-center justify-center pt-32">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Course not found</h1>
+          </div>
         </div>
       </div>
     );
@@ -149,16 +152,12 @@ export default function CourseDetail() {
   const completionPercentage = progress ? Math.round((progress.completed_lessons?.length || 0) / sortedLessons.length * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
-          <button
-            onClick={() => router.push('/courses')}
-            className="text-gray-600 hover:text-gray-900 font-medium"
-          >
-            ← Back to courses
-          </button>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <Head>
+        <title>{course.name} - Lingua Journey</title>
+      </Head>
+      <Navbar />
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
           <div className="h-48 bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center">
@@ -200,9 +199,9 @@ export default function CourseDetail() {
                         router.push(`/courses/${id}/lessons/${lesson.id}`);
                       }
                     }}
-                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-xl font-medium hover:from-green-700 hover:to-emerald-700 transition-colors"
+                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-xl font-medium hover:from-green-700 hover:to-emerald-700 transition-colors flex items-center justify-center gap-2"
                   >
-                    Continue Learning →
+                    Continue Learning <ArrowIcon direction="right" color="white" size="sm" />
                   </button>
                 )}
               </div>
@@ -265,7 +264,7 @@ export default function CourseDetail() {
                         </div>
                       </div>
                       {isUnlocked && (
-                        <div className="text-blue-600">→</div>
+                        <ArrowIcon direction="right" color="primary" />
                       )}
                       {!isUnlocked && progress && (
                         <div className="text-gray-400">🔒</div>

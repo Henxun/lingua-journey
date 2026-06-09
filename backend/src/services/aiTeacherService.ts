@@ -8,7 +8,13 @@ import {
   createVocabularyExplanationPrompt,
   createErrorCorrectionPrompt,
   createPracticeQuestionPrompt,
-  AIContext
+  createLearningPathPrompt,
+  createAdaptivePracticePrompt,
+  createLearningStyleAnalysisPrompt,
+  createContentGenerationPrompt,
+  AIContext,
+  LearningData,
+  LearningStyleResult
 } from './aiTeacherPrompts';
 
 dotenv.config();
@@ -156,4 +162,107 @@ export async function generatePracticeQuestion(
   });
 
   return completion.choices[0].message.content || "I'm unable to generate a practice question right now.";
+}
+
+export async function generatePersonalizedLearningPath(
+  aiContext: AIContext,
+  learningData: LearningData
+): Promise<string> {
+  const prompt = createLearningPathPrompt(aiContext, learningData);
+
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-4',
+    messages: [
+      { role: 'system', content: `You are an expert language learning advisor. Speak in ${aiContext.nativeLanguage}.` },
+      { role: 'user', content: prompt }
+    ],
+    temperature: 0.6,
+    max_tokens: 1500
+  });
+
+  return completion.choices[0].message.content || "I'm unable to generate a learning path right now.";
+}
+
+export async function generateAdaptivePractice(
+  topic: string,
+  aiContext: AIContext,
+  performanceHistory: { correct: number; total: number; mistakes: string[] }
+): Promise<string> {
+  const prompt = createAdaptivePracticePrompt(topic, aiContext, performanceHistory);
+
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-4',
+    messages: [
+      { role: 'system', content: `You are a language practice generator. Create exercises in ${aiContext.targetLanguage} with explanations in ${aiContext.nativeLanguage}.` },
+      { role: 'user', content: prompt }
+    ],
+    temperature: 0.7,
+    max_tokens: 1200
+  });
+
+  return completion.choices[0].message.content || "I'm unable to generate practice exercises right now.";
+}
+
+export async function analyzeLearningStyle(
+  aiContext: AIContext,
+  learningPatterns: {
+    preferredActivities: string[];
+    timeDistribution: { morning: number; afternoon: number; evening: number };
+    interactionStyle: string;
+    feedbackPreferences: string[];
+    topicEngagement: { topic: string; engagement: number }[];
+  }
+): Promise<LearningStyleResult> {
+  const prompt = createLearningStyleAnalysisPrompt(aiContext, learningPatterns);
+
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-4',
+    messages: [
+      { role: 'system', content: `You are an expert educational psychologist specializing in language learning. Respond in ${aiContext.nativeLanguage}.` },
+      { role: 'user', content: prompt }
+    ],
+    temperature: 0.5,
+    max_tokens: 1000
+  });
+
+  const content = completion.choices[0].message.content || "{}";
+  
+  try {
+    const parsed = JSON.parse(content);
+    return {
+      primaryStyle: parsed.primaryStyle || 'Visual',
+      secondaryStyle: parsed.secondaryStyle || 'Auditory',
+      description: parsed.description || 'No description available',
+      recommendations: parsed.recommendations || [],
+      optimalActivities: parsed.optimalActivities || []
+    };
+  } catch {
+    return {
+      primaryStyle: 'Visual',
+      secondaryStyle: 'Reading/Writing',
+      description: content,
+      recommendations: [],
+      optimalActivities: []
+    };
+  }
+}
+
+export async function generateContent(
+  topic: string,
+  aiContext: AIContext,
+  contentType: 'lesson' | 'exercise' | 'story'
+): Promise<string> {
+  const prompt = createContentGenerationPrompt(topic, aiContext, contentType);
+
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-4',
+    messages: [
+      { role: 'system', content: createSystemPrompt(aiContext) },
+      { role: 'user', content: prompt }
+    ],
+    temperature: 0.7,
+    max_tokens: 1500
+  });
+
+  return completion.choices[0].message.content || "I'm unable to generate content right now.";
 }

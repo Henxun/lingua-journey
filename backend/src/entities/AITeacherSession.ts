@@ -21,7 +21,7 @@ export class AITeacherSession {
   @Column({ type: 'text', nullable: true })
   context?: string;
 
-  @Column({ type: 'json', default: () => "'[]'" })
+  @Column({ type: 'simple-json', default: '[]' })
   messages: Message[];
 
   @Column({ default: true })

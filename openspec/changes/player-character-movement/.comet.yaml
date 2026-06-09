@@ -1,9 +1,9 @@
 workflow: full
-phase: build
+phase: verify
 build_mode: subagent-driven-development
 build_pause: null
 isolation: branch
-verify_mode: null
+verify_mode: full
 base_ref: f1600b5f30e147e6366009e1ea052cc291436e84
 design_doc: docs/superpowers/specs/2026-06-09-player-character-movement-design.md
 plan: docs/superpowers/plans/2026-06-09-player-character-movement.md

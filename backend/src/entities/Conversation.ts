@@ -22,7 +22,7 @@ export class Conversation {
   @Column()
   scenario: string;
 
-  @Column({ type: 'json' })
+  @Column({ type: 'simple-json' })
   messages: Message[];
 
   @Column({ nullable: true })

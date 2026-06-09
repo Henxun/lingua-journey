@@ -1,0 +1,413 @@
+{
+  "common": {
+    "appName": "语言旅程",
+    "loading": "加载中...",
+    "error": "发生错误",
+    "retry": "重试",
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "close": "关闭",
+    "confirm": "确认",
+    "back": "返回",
+    "next": "下一步",
+    "previous": "上一步",
+    "submit": "提交",
+    "search": "搜索",
+    "filter": "筛选",
+    "sort": "排序",
+    "clear": "清除",
+    "yes": "是",
+    "no": "否",
+    "or": "或"
+  },
+  "nav": {
+    "home": "首页",
+    "courses": "课程",
+    "vocabulary": "词汇",
+    "progress": "进度",
+    "aiTeacher": "AI老师",
+    "assessment": "测评",
+    "profile": "我的",
+    "settings": "设置",
+    "logout": "退出登录",
+    "login": "登录",
+    "register": "注册"
+  },
+  "home": {
+    "hero": {
+      "titleLine1": "学习语言",
+      "titleLine2": "在真实场景中",
+      "description": "通过AI模拟对话进行练习，沉浸在多语言场景中。从日常对话到商务场合，让语言学习变得有趣且快速提升您的技能。",
+      "title": "用AI驱动的学习掌握任何语言",
+      "subtitle": "个性化课程、智能反馈和自适应练习，帮助您更快达到流利水平",
+      "startLearning": "开始学习",
+      "learnMore": "了解更多"
+    },
+    "features": {
+      "title": "为什么选择语言旅程？",
+      "aiDialog": {
+        "title": "AI对话练习",
+        "description": "真实场景模拟配合智能纠错反馈"
+      },
+      "aiTeacher": {
+        "title": "AI教师指导",
+        "description": "个性化课程推荐与知识讲解"
+      },
+      "scene3d": {
+        "title": "3D场景互动",
+        "description": "沉浸式3D场景，互动式学习体验"
+      },
+      "aiTutor": {
+        "title": "AI驱动导师",
+        "description": "获得全天候24/7的个性化AI语言教师指导"
+      },
+      "adaptiveLearning": {
+        "title": "自适应学习",
+        "description": "根据您的技能水平和学习节奏调整内容"
+      },
+      "comprehensive": {
+        "title": "综合评估",
+        "description": "通过CEFR对齐的评估跟踪您的进度"
+      }
+    },
+    "languages": {
+      "title": "多语言支持",
+      "subtitle": "从主流全球语言到小语种，满足您的所有学习需求"
+    },
+    "footer": {
+      "features": "功能",
+      "aiDialog": "AI对话",
+      "aiTeacher": "AI老师",
+      "assessment": "语言测评",
+      "vocabulary": "词汇",
+      "supportedLanguages": "支持的语言",
+      "english": "英语",
+      "chinese": "中文",
+      "japanese": "日语",
+      "korean": "韩语",
+      "contactUs": "联系我们",
+      "aboutUs": "关于我们",
+      "privacyPolicy": "隐私政策",
+      "termsOfService": "服务条款"
+    },
+    "cta": {
+      "title": "准备好开始您的语言学习之旅了吗？",
+      "button": "免费开始"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "欢迎回来",
+      "subtitle": "欢迎回来！继续您的语言学习之旅",
+      "signin": "登录",
+      "signingIn": "登录中...",
+      "sendCode": "发送验证码",
+      "resendIn": "{{seconds}}秒后重新发送",
+      "sending": "发送中...",
+      "verifySignin": "验证并登录",
+      "verifying": "验证中...",
+      "verificationCode": "验证码",
+      "email": "邮箱",
+      "password": "密码",
+      "rememberMe": "记住我",
+      "forgotPassword": "忘记密码？",
+      "submit": "登录",
+      "noAccount": "没有账号？",
+      "signUp": "注册",
+      "orContinueWith": "或使用以下方式继续"
+    },
+    "register": {
+      "title": "创建账号",
+      "username": "用户名",
+      "email": "邮箱",
+      "password": "密码",
+      "confirmPassword": "确认密码",
+      "nativeLanguage": "母语",
+      "targetLanguage": "目标语言",
+      "submit": "创建账号",
+      "hasAccount": "已有账号？",
+      "login": "登录",
+      "orContinueWith": "或使用以下方式继续"
+    },
+    "forgotPassword": {
+      "title": "重置密码",
+      "email": "邮箱",
+      "submit": "发送重置码",
+      "rememberPassword": "记得密码？",
+      "login": "登录"
+    },
+    "resetPassword": {
+      "title": "设置新密码",
+      "code": "验证码",
+      "password": "新密码",
+      "confirmPassword": "确认新密码",
+      "submit": "重置密码"
+    },
+    "oauth": {
+      "google": "使用Google继续",
+      "github": "使用GitHub继续"
+    }
+  },
+  "courses": {
+    "pageTitle": "课程 - 语言旅程",
+    "browse": "浏览课程",
+    "title": "语言课程",
+    "subtitle": "找到适合您语言学习之旅的完美课程",
+    "filter": {
+      "language": "语言",
+      "difficulty": "难度",
+      "all": "全部",
+      "beginner": "初级",
+      "intermediate": "中级",
+      "advanced": "高级"
+    },
+    "empty": {
+      "title": "未找到课程",
+      "description": "尝试调整筛选条件"
+    },
+    "startLearning": "开始学习",
+    "card": {
+      "lessons": "{{count}}节课",
+      "startCourse": "开始课程",
+      "continueCourse": "继续",
+      "completed": "已完成"
+    },
+    "detail": {
+      "about": "关于本课程",
+      "curriculum": "课程大纲",
+      "lesson": "课时",
+      "progress": "进度",
+      "completeLesson": "标记为完成",
+      "previousLesson": "上一课",
+      "nextLesson": "下一课"
+    }
+  },
+  "vocabulary": {
+    "pageTitle": "词汇 - 语言旅程",
+    "flashcards": "闪卡",
+    "title": "词汇",
+    "subtitle": "智能闪卡帮助您记忆单词",
+    "reviewBanner": {
+      "title": "复习提醒",
+      "cardsReady": "张卡片待复习",
+      "dueNow": "立即复习",
+      "startReview": "开始复习"
+    },
+    "decks": "我的卡组",
+    "decksEmpty": "暂无卡组",
+    "cards": "{{count}}张卡片",
+    "progress": "进度",
+    "allCards": "所有卡片",
+    "addCard": "添加卡片",
+    "noCards": {
+      "title": "暂无卡片",
+      "subtitle": "添加您的第一张卡片开始学习",
+      "createFirst": "创建第一张卡片"
+    },
+    "reviewedCount": "已复习：{{count}}",
+    "correctCount": "正确率：{{count}}%",
+    "addCardModal": {
+      "title": "添加新卡片",
+      "front": "正面（单词）",
+      "back": "背面（释义）",
+      "example": "例句",
+      "save": "保存卡片"
+    },
+    "createDeckModal": {
+      "title": "创建新卡组",
+      "name": "卡组名称",
+      "description": "描述",
+      "create": "创建卡组"
+    },
+    "confirmDelete": {
+      "title": "删除卡片",
+      "message": "确定要删除这张卡片吗？"
+    },
+    "review": "复习",
+    "createDeck": "创建卡组",
+    "front": "正面",
+    "back": "背面",
+    "example": "例句",
+    "reviewComplete": {
+      "title": "复习完成！",
+      "score": "您的得分是{{score}}%",
+      "cardsReviewed": "复习卡片数：{{count}}",
+      "continue": "继续"
+    }
+  },
+  "aiTeacher": {
+    "pageTitle": "AI老师 - 语言旅程",
+    "title": "AI语言老师",
+    "subtitle": "全天候24/7您的个人语言导师",
+    "sessions": "会话",
+    "topicPlaceholder": "您想学习什么？",
+    "messages": "{{count}}条消息",
+    "you": "您",
+    "aiTeacher": "AI老师",
+    "inputPlaceholder": "输入您的消息...",
+    "sending": "发送中...",
+    "send": "发送",
+    "startLearning": "开始AI学习",
+    "startLearningDescription": "您的AI老师已准备好帮助您练习和提高",
+    "newSession": "新建会话",
+    "topic": "话题",
+    "startChat": "开始聊天",
+    "typeMessage": "输入您的消息...",
+    "suggestions": {
+      "grammar": "语法解释",
+      "vocabulary": "词汇解释",
+      "correction": "获取纠正",
+      "practice": "会话练习"
+    },
+    "features": {
+      "grammar": "语法解释",
+      "vocabulary": "词汇积累",
+      "correction": "文本纠正",
+      "conversation": "会话练习"
+    }
+  },
+  "assessment": {
+    "pageTitle": "测评 - 语言旅程",
+    "title": "语言测评",
+    "subtitle": "测试您的语言水平",
+    "loading": "正在加载测评...",
+    "noAssessments": "暂无可用测评",
+    "checkBackLater": "请稍后再来查看新测评",
+    "skills": "技能",
+    "min": "分钟",
+    "questions": "题",
+    "toPass": "及格",
+    "start": "开始测评",
+    "complete": "完成！",
+    "recommendations": "建议",
+    "backToAssessments": "返回测评",
+    "questionOf": "第{{current}}题，共{{total}}题",
+    "previous": "上一题",
+    "next": "下一题",
+    "submitting": "提交中...",
+    "submitAssessment": "提交测评",
+    "typeAnswer": "在此输入答案...",
+    "writeAnswer": "写下您的答案",
+    "question": "第{{current}}题，共{{total}}题",
+    "submitAnswer": "提交答案",
+    "nextQuestion": "下一题",
+    "complete": {
+      "title": "测评完成！",
+      "score": "您的得分",
+      "level": "推荐级别",
+      "feedback": "反馈",
+      "recommendations": "建议",
+      "retry": "再试一次",
+      "backToAssessments": "返回测评"
+    }
+  },
+  "progress": {
+    "pageTitle": "进度 - 语言旅程",
+    "loading": "正在加载您的进度...",
+    "title": "学习进度",
+    "subtitle": "跟踪您的语言学习之旅",
+    "stats": {
+      "averageScore": "平均分",
+      "assessmentsCompleted": "已完成测评",
+      "bestSkill": "最佳技能",
+      "needsImprovement": "需要改进"
+    },
+    "skillBreakdown": {
+      "title": "技能详情",
+      "level": "等级",
+      "lastAssessed": "上次测评"
+    },
+    "weeklyProgress": {
+      "title": "每周进度"
+    },
+    "recommendations": {
+      "title": "建议"
+    },
+    "actions": {
+      "takeAssessment": "参加测评",
+      "chatWithAi": "与AI聊天"
+    },
+    "charts": {
+      "weeklyProgress": "每周进度",
+      "skillRadar": "技能分布"
+    },
+    "insights": {
+      "title": "学习洞察",
+      "noData": "完成更多测评以查看洞察"
+    }
+  },
+  "profile": {
+    "pageTitle": "我的 - 语言旅程",
+    "title": "我的资料",
+    "stats": "学习统计",
+    "achievements": "成就",
+    "settings": "设置",
+    "learningPath": "学习路径",
+    "streak": {
+      "title": "当前连续学习",
+      "days": "{{count}}天"
+    },
+    "editProfile": "编辑资料",
+    "nativeLanguage": "母语",
+    "targetLanguage": "目标语言",
+    "myCourses": "我的课程",
+    "complete": "{{count}}%完成",
+    "completed": "已完成",
+    "inProgress": "进行中",
+    "emailStatus": "邮箱状态",
+    "verified": "已验证",
+    "notVerified": "未验证",
+    "linkedAccounts": "关联账号",
+    "unlink": "解除关联",
+    "viewStats": "查看统计",
+    "gameCenter": "游戏中心",
+    "vocabulary": "词汇",
+    "logout": "退出登录",
+    "changePassword": "修改密码",
+    "setupPassword": "设置密码",
+    "currentPassword": "当前密码",
+    "newPassword": "新密码",
+    "username": "用户名",
+    "saveChanges": "保存更改",
+    "cancel": "取消",
+    "loadError": "加载资料失败",
+    "updateError": "更新资料失败",
+    "updateSuccess": "资料更新成功",
+    "passwordChangeSuccess": "密码修改成功"
+  },
+  "languages": {
+    "en": "英语",
+    "zh": "中文",
+    "es": "西班牙语",
+    "fr": "法语",
+    "de": "德语",
+    "ja": "日语",
+    "ko": "韩语"
+  },
+  "levels": {
+    "A1": "初级",
+    "A2": "基础",
+    "B1": "中级",
+    "B2": "中高级",
+    "C1": "高级",
+    "C2": "精通"
+  },
+  "skills": {
+    "listening": "听力",
+    "reading": "阅读",
+    "speaking": "口语",
+    "writing": "写作"
+  },
+  "footer": {
+    "description": "您的AI驱动语言学习伙伴",
+    "quickLinks": "快速链接",
+    "resources": "资源",
+    "support": "支持",
+    "legal": "法律",
+    "privacy": "隐私政策",
+    "terms": "服务条款",
+    "contact": "联系我们"
+  }
+}

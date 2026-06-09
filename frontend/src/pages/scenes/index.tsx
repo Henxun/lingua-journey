@@ -9,6 +9,7 @@ import { Navbar } from '../../components/Navbar';
 import { Character3D } from '../../components/scenes/Character3D';
 import { PlayerCharacter } from '../../components/scenes/PlayerCharacter';
 import { InteractionPrompt } from '../../components/scenes/InteractionPrompt';
+import { CandleFlicker } from '../../components/scenes/CandleFlicker';
 import { useVoiceChat } from '../../hooks/useVoiceChat';
 import { usePlayerControls } from '../../hooks/usePlayerControls';
 import { useProximityDetection } from '../../hooks/useProximityDetection';
@@ -242,15 +243,6 @@ function RestaurantEnvironment() {
         </group>
       ))}
 
-      {/* CANDLE on tables */}
-      {[
-        [-2.5, 0.77, -0.5],
-        [0.5, 0.77, -0.5],
-        [2.5, 0.77, -2.5],
-      ].map((pos, i) => (
-        <CandleFlicker key={i} position={pos as [number, number, number]} />
-      ))}
-
       {/* PLANT in corner */}
       <group position={[-8.5, 0, -5]}>
         <mesh position={[0, 0.4, 0]} castShadow>
@@ -289,37 +281,6 @@ function RestaurantEnvironment() {
           </group>
         ))}
       </group>
-    </group>
-  );
-}
-
-// ============== Flickering Candle ==============
-function CandleFlicker({ position }: { position: [number, number, number] }) {
-  const flameRef = useRef<THREE.Mesh>(null);
-  const lightRef = useRef<THREE.PointLight>(null);
-
-  useFrame((state) => {
-    const t = state.clock.elapsedTime;
-    if (flameRef.current) {
-      const flicker = 0.9 + Math.sin(t * 10) * 0.1 + Math.random() * 0.1;
-      flameRef.current.scale.set(1, flicker, 1);
-    }
-    if (lightRef.current) {
-      lightRef.current.intensity = 0.4 + Math.sin(t * 8) * 0.1 + Math.random() * 0.08;
-    }
-  });
-
-  return (
-    <group position={position}>
-      <mesh castShadow>
-        <cylinderGeometry args={[0.04, 0.05, 0.25, 8]} />
-        <meshStandardMaterial color="#FFF8DC" roughness={0.6} />
-      </mesh>
-      <mesh ref={flameRef} position={[0, 0.18, 0]}>
-        <coneGeometry args={[0.03, 0.1, 8]} />
-        <meshStandardMaterial color="#FFA500" emissive="#FF6600" emissiveIntensity={2} transparent opacity={0.9} />
-      </mesh>
-      <pointLight ref={lightRef} color="#FF8C42" distance={2.5} decay={2} position={[0, 0.2, 0]} />
     </group>
   );
 }
@@ -453,6 +414,9 @@ function DiningTable({ position, rotationY = 0, tableId, selectedObject, onObjec
           <meshStandardMaterial color="#E8E8D0" />
         </mesh>
       </InteractiveItem>
+
+      {/* CANDLE on table */}
+      <CandleFlicker position={[0, 0.77, 0]} />
     </group>
   );
 }

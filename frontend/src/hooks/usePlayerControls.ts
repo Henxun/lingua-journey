@@ -151,7 +151,8 @@ export function usePlayerControls({ enabled = true }: UsePlayerControlsOptions =
     cameraDirection.normalize();
 
     // Calculate movement direction based on camera facing
-    frontVector.current.set(0, 0, Number(backward) - Number(forward));
+    // W = forward = camera direction, S = backward = opposite
+    frontVector.current.set(0, 0, Number(forward) - Number(backward));
     sideVector.current.set(Number(left) - Number(right), 0, 0);
 
     // Combine vectors

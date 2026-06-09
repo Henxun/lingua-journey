@@ -486,6 +486,25 @@ export interface AIContext {
   nativeLanguage: string;
   cefrLevel: string;
   topic?: string;
+  recentLesson?: string;
+  learningGoals?: string;
+}
+
+export interface LearningData {
+  completedCourses: string[];
+  assessmentScores: { skill: string; score: number }[];
+  timeSpent: number;
+  preferredTopics: string[];
+  weakAreas: string[];
+  learningGoals: string;
+}
+
+export interface LearningStyleResult {
+  primaryStyle: string;
+  secondaryStyle: string;
+  description: string;
+  recommendations: string[];
+  optimalActivities: string[];
 }
 
 export const aiTeacherAPI = {
@@ -523,6 +542,47 @@ export const aiTeacherAPI = {
     fetchAPI('/ai-teacher/practice', {
       method: 'POST',
       body: JSON.stringify({ topic, aiContext }),
+    }),
+
+  generateLearningPath: (aiContext: AIContext, learningData: LearningData): Promise<{ path: string }> =>
+    fetchAPI('/ai-teacher/learning-path', {
+      method: 'POST',
+      body: JSON.stringify({ aiContext, learningData }),
+    }),
+
+  generateAdaptivePractice: (
+    topic: string,
+    aiContext: AIContext,
+    performanceHistory: { correct: number; total: number; mistakes: string[] }
+  ): Promise<{ practice: string }> =>
+    fetchAPI('/ai-teacher/adaptive-practice', {
+      method: 'POST',
+      body: JSON.stringify({ topic, aiContext, performanceHistory }),
+    }),
+
+  analyzeLearningStyle: (
+    aiContext: AIContext,
+    learningPatterns: {
+      preferredActivities: string[];
+      timeDistribution: { morning: number; afternoon: number; evening: number };
+      interactionStyle: string;
+      feedbackPreferences: string[];
+      topicEngagement: { topic: string; engagement: number }[];
+    }
+  ): Promise<LearningStyleResult> =>
+    fetchAPI('/ai-teacher/learning-style', {
+      method: 'POST',
+      body: JSON.stringify({ aiContext, learningPatterns }),
+    }),
+
+  generateContent: (
+    topic: string,
+    aiContext: AIContext,
+    contentType: 'lesson' | 'exercise' | 'story'
+  ): Promise<{ content: string }> =>
+    fetchAPI('/ai-teacher/generate-content', {
+      method: 'POST',
+      body: JSON.stringify({ topic, aiContext, contentType }),
     }),
 };
 
@@ -624,4 +684,77 @@ export const progressAPI = {
       : '/progress/trend';
     return fetchAPI(url);
   },
+};
+
+// Scene Types
+export interface SceneObject {
+  id: string;
+  scene_id: string;
+  name: string;
+  position_x: number;
+  position_y: number;
+  position_z: number;
+  interactive: boolean;
+  trigger_action: string;
+}
+
+export interface Scene {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  model_url: string;
+  thumbnail_url?: string;
+  is_active: boolean;
+  objects: SceneObject[];
+  created_at: string;
+}
+
+export interface SceneInteractionResult {
+  message: string;
+  action: string;
+  object: SceneObject;
+  learningContent?: {
+    vocabulary?: string[];
+    grammar?: string[];
+    dialogue?: string;
+  };
+}
+
+export interface LearningContentForObject {
+  vocabulary: string[];
+  grammar: string[];
+  dialogue: string;
+  culturalTip?: string;
+}
+
+export const sceneAPI = {
+  getScenes: (): Promise<Scene[]> =>
+    fetchAPI('/scenes/list'),
+
+  getScene: (id: string): Promise<Scene> =>
+    fetchAPI(`/scenes/${id}`),
+
+  getSceneObjects: (id: string): Promise<SceneObject[]> =>
+    fetchAPI(`/scenes/${id}/objects`),
+
+  interactWithScene: (sceneId: string, objectId: string): Promise<SceneInteractionResult> =>
+    fetchAPI(`/scenes/${sceneId}/interact`, {
+      method: 'POST',
+      body: JSON.stringify({ object_id: objectId }),
+    }),
+
+  getLearningContent: (sceneId: string, objectId: string): Promise<LearningContentForObject> =>
+    fetchAPI(`/scenes/${sceneId}/objects/${objectId}/learning-content`),
+
+  generateSceneDescription: (sceneId: string): Promise<{ description: string }> =>
+    fetchAPI(`/scenes/${sceneId}/describe`, {
+      method: 'POST',
+    }),
+
+  generateObjectDialogue: (sceneId: string, objectId: string, context: string): Promise<{ dialogue: string }> =>
+    fetchAPI(`/scenes/${sceneId}/objects/${objectId}/dialogue`, {
+      method: 'POST',
+      body: JSON.stringify({ context }),
+    }),
 };

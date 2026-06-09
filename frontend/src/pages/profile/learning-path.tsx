@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import { motion } from 'framer-motion';
+import { Navbar } from '../../components/Navbar';
 import { learningAPI, LearningGoal, LearningPath, CourseRecommendation } from '../../lib/api';
 
 function GoalCard({ goal, onEdit, onDelete }: { goal: LearningGoal; onEdit: () => void; onDelete: () => void }) {
@@ -258,22 +260,21 @@ export default function LearningPathPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <button
-            onClick={() => router.push('/profile')}
-            className="mb-4 px-4 py-2 bg-white rounded-lg text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+    <>
+      <Head>
+        <title>Learning Path - Lingua Journey</title>
+      </Head>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+        <Navbar />
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
           >
-            ← 返回个人中心
-          </button>
-          <h1 className="text-3xl font-bold text-gray-800">学习路径</h1>
-          <p className="text-gray-600 mt-2">设定目标，规划学习路径</p>
-        </motion.div>
+            <h1 className="text-3xl font-bold text-gray-800">学习路径</h1>
+            <p className="text-gray-600 mt-2">设定目标，规划学习路径</p>
+          </motion.div>
 
         <div className="space-y-6">
           <motion.div
@@ -380,7 +381,8 @@ export default function LearningPathPage() {
 
           <RecommendationsList recommendations={recommendations} />
         </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

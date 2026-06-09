@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import session from 'express-session';
 import dotenv from 'dotenv';
+import { createServer } from 'http';
 import { AppDataSource } from './config/database';
 import authRoutes from './routes/authRoutes';
 import conversationRoutes from './routes/conversationRoutes';
@@ -18,6 +19,7 @@ import assessmentRoutes from './routes/assessmentRoutes';
 import progressRoutes from './routes/progressRoutes';
 import { seedCourses } from './seed';
 import { seedAchievements, seedDailyQuests } from './services/gamificationService';
+import { VoiceServer } from './servers/voiceServer';
 
 dotenv.config();
 
@@ -57,8 +59,16 @@ AppDataSource.initialize()
     await seedCourses();
     await seedAchievements();
     await seedDailyQuests();
-    app.listen(PORT, () => {
+    
+    // Create HTTP server for WebSocket support
+    const server = createServer(app);
+    
+    // Initialize Voice WebSocket Server
+    new VoiceServer(server);
+    
+    server.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
+      console.log('Voice WebSocket ready at ws://localhost:' + PORT + '/voice');
     });
   })
   .catch((error) => {
