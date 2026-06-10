@@ -1,451 +1,396 @@
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import Head from 'next/head';
-import { useTranslation } from 'react-i18next';
-import { vocabularyAPI, VocabularyCard, VocabularyDeck, MasteryStats } from '../../lib/api';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/router';
 import { Navbar } from '../../components/Navbar';
 
-const masteryColors = {
-  new: { bg: 'from-red-400 to-rose-500', text: 'text-red-600', light: 'bg-red-100', label: 'New' },
-  learning: { bg: 'from-orange-400 to-amber-500', text: 'text-orange-600', light: 'bg-orange-100', label: 'Learning' },
-  familiar: { bg: 'from-yellow-400 to-lime-500', text: 'text-yellow-600', light: 'bg-yellow-100', label: 'Familiar' },
-  known: { bg: 'from-green-400 to-emerald-500', text: 'text-green-600', light: 'bg-green-100', label: 'Known' },
-  mastered: { bg: 'from-blue-400 to-indigo-500', text: 'text-blue-600', light: 'bg-blue-100', label: 'Mastered' },
+interface VocabularyCard {
+  id: string;
+  front: string;
+  back: string;
+  example?: string;
+  mastery_level: 'new' | 'learning' | 'familiar' | 'known' | 'mastered';
+  next_review?: string;
+  review_count: number;
+  correct_count: number;
+}
+
+interface VocabularyDeck {
+  id: string;
+  name: string;
+  description?: string;
+  card_count: number;
+  is_auto: boolean;
+}
+
+const masteryColors: Record<string, string> = {
+  new: 'bg-gray-100 text-gray-600',
+  learning: 'bg-yellow-100 text-yellow-700',
+  familiar: 'bg-blue-100 text-blue-700',
+  known: 'bg-green-100 text-green-700',
+  mastered: 'bg-purple-100 text-purple-700'
 };
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 }
-  }
+const masteryLabels: Record<string, string> = {
+  new: '新词',
+  learning: '学习中',
+  familiar: '熟悉',
+  known: '已掌握',
+  mastered: '精通'
 };
 
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: { duration: 0.5 }
-  }
-};
-
-export default function Vocabulary() {
-  const { t } = useTranslation();
+export default function VocabularyPage() {
   const router = useRouter();
   const [cards, setCards] = useState<VocabularyCard[]>([]);
   const [decks, setDecks] = useState<VocabularyDeck[]>([]);
-  const [masteryStats, setMasteryStats] = useState<MasteryStats | null>(null);
-  const [dueCards, setDueCards] = useState<VocabularyCard[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreateCard, setShowCreateCard] = useState(false);
-  const [showCreateDeck, setShowCreateDeck] = useState(false);
-  const [selectedDeck, setSelectedDeck] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'cards' | 'decks'>('cards');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showAddModal, setShowAddModal] = useState(false);
   const [newCard, setNewCard] = useState({ front: '', back: '', example: '' });
-  const [newDeck, setNewDeck] = useState({ name: '', description: '' });
 
   useEffect(() => {
-    fetchData();
+    fetchVocabulary();
   }, []);
 
-  const fetchData = async () => {
+  const fetchVocabulary = async () => {
     try {
-      setLoading(true);
-      const [cardsData, decksData, statsData, dueCardsData] = await Promise.all([
-        vocabularyAPI.getCards(),
-        vocabularyAPI.getDecks(),
-        vocabularyAPI.getMasteryStats(),
-        vocabularyAPI.getDueCards(),
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+
+      const [cardsRes, decksRes] = await Promise.all([
+        fetch('/api/vocabulary/cards', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch('/api/vocabulary/decks', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
       ]);
-      setCards(cardsData);
-      setDecks(decksData);
-      setMasteryStats(statsData);
-      setDueCards(dueCardsData);
+
+      if (cardsRes.ok) {
+        const cardsData = await cardsRes.json();
+        setCards(cardsData.cards || []);
+      }
+
+      if (decksRes.ok) {
+        const decksData = await decksRes.json();
+        setDecks(decksData.decks || []);
+      }
     } catch (error) {
-      console.error('Failed to load vocabulary data:', error);
+      console.error('Failed to fetch vocabulary:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateCard = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await vocabularyAPI.createCard({
-        ...newCard,
-        deckId: selectedDeck || undefined,
-      });
-      setNewCard({ front: '', back: '', example: '' });
-      setShowCreateCard(false);
-      fetchData();
-    } catch (error) {
-      console.error('Failed to create card:', error);
-    }
-  };
+  const handleAddCard = async () => {
+    if (!newCard.front || !newCard.back) return;
 
-  const handleCreateDeck = async (e: React.FormEvent) => {
-    e.preventDefault();
     try {
-      await vocabularyAPI.createDeck(newDeck);
-      setNewDeck({ name: '', description: '' });
-      setShowCreateDeck(false);
-      fetchData();
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/vocabulary/cards', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newCard)
+      });
+
+      if (response.ok) {
+        setNewCard({ front: '', back: '', example: '' });
+        setShowAddModal(false);
+        fetchVocabulary();
+      }
     } catch (error) {
-      console.error('Failed to create deck:', error);
+      console.error('Failed to add card:', error);
     }
   };
 
   const handleDeleteCard = async (cardId: string) => {
-    if (confirm(t('common.confirmDelete'))) {
-      try {
-        await vocabularyAPI.deleteCard(cardId);
-        fetchData();
-      } catch (error) {
-        console.error('Failed to delete card:', error);
+    if (!confirm('确定要删除这张卡片吗？')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/vocabulary/cards/${cardId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        fetchVocabulary();
       }
+    } catch (error) {
+      console.error('Failed to delete card:', error);
     }
   };
 
+  const filteredCards = cards.filter(card =>
+    card.front.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    card.back.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const dueCards = cards.filter(card => {
+    if (!card.next_review) return card.mastery_level === 'new';
+    return new Date(card.next_review) <= new Date();
+  });
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50">
-        <Navbar />
-        <div className="flex items-center justify-center pt-32">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full"
-          />
-        </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50">
-      <Head>
-        <title>{t('vocabulary.pageTitle')} - Lingua Journey</title>
-      </Head>
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full text-sm font-semibold text-purple-700 mb-6 shadow-lg border border-purple-100">
-            📝 {t('vocabulary.flashcards')}
-          </div>
-          <h1 className="text-5xl font-black text-gray-900 mb-4">{t('vocabulary.title')}</h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">{t('vocabulary.subtitle')}</p>
-        </motion.div>
+      
+      <main className="max-w-6xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">词汇卡片</h1>
+          <p className="text-gray-600">使用间隔重复算法高效记忆词汇</p>
+        </div>
 
-        {dueCards.length > 0 && (
-          <motion.div 
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-xl shadow-sm p-4"
+          >
+            <div className="text-2xl font-bold text-blue-600">{cards.length}</div>
+            <div className="text-sm text-gray-600">总词汇</div>
+          </motion.div>
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-gradient-to-r from-purple-500 to-pink-600 rounded-3xl shadow-2xl p-8 mb-12 text-white cursor-pointer"
-            onClick={() => router.push('/vocabulary/review')}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            className="bg-white rounded-xl shadow-sm p-4"
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-2xl font-bold mb-2">🎯 {t('vocabulary.reviewBanner.title')}</div>
-                <div className="text-lg opacity-90">{t('vocabulary.reviewBanner.cardsReady', { count: dueCards.length })}</div>
-              </div>
-              <div className="text-right">
-                <div className="text-6xl font-black">{dueCards.length}</div>
-                <div className="text-sm opacity-75">{t('vocabulary.reviewBanner.dueNow')}</div>
-              </div>
-            </div>
-            <div className="mt-6 bg-white/20 rounded-2xl py-4 px-6 text-center font-semibold">
-              {t('vocabulary.reviewBanner.startReview')} →
-            </div>
+            <div className="text-2xl font-bold text-orange-600">{dueCards.length}</div>
+            <div className="text-sm text-gray-600">待复习</div>
           </motion.div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="lg:col-span-1"
+            className="bg-white rounded-xl shadow-sm p-4"
           >
-            <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">📚 {t('vocabulary.decks')}</h2>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setShowCreateDeck(true)}
-                  className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl shadow-lg"
-                >
-                  +
-                </motion.button>
-              </div>
-              <div className="space-y-3">
-                {decks.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <div className="text-4xl mb-3">📦</div>
-                    <p>{t('vocabulary.decksEmpty')}</p>
-                  </div>
-                ) : (
-                  decks.map((deck) => (
-                    <motion.div
-                      key={deck.id}
-                      whileHover={{ scale: 1.02 }}
-                      className={`p-4 rounded-2xl cursor-pointer transition-all ${
-                        selectedDeck === deck.id 
-                          ? 'bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-300' 
-                          : 'bg-gray-50 border-2 border-transparent hover:border-purple-200'
-                      }`}
-                      onClick={() => setSelectedDeck(selectedDeck === deck.id ? null : deck.id)}
-                    >
-                      <div className="font-bold text-gray-900">{deck.name}</div>
-                      {deck.description && (
-                        <div className="text-sm text-gray-600 mt-1">{deck.description}</div>
-                      )}
-                      <div className="text-sm text-gray-500 mt-2">{deck.card_count} {t('vocabulary.cards')}</div>
-                    </motion.div>
-                  ))
-                )}
-              </div>
+            <div className="text-2xl font-bold text-green-600">
+              {cards.filter(c => c.mastery_level === 'mastered' || c.mastery_level === 'known').length}
             </div>
+            <div className="text-sm text-gray-600">已掌握</div>
           </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="lg:col-span-2"
+            className="bg-white rounded-xl shadow-sm p-4"
           >
-            <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">📊 {t('vocabulary.progress')}</h2>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                {masteryStats && Object.entries(masteryStats).map(([level, count]) => {
-                  const colors = masteryColors[level as keyof typeof masteryColors];
-                  return (
-                    <motion.div
-                      key={level}
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      whileHover={{ scale: 1.05 }}
-                      className="text-center p-4 rounded-2xl"
-                    >
-                      <div className={`w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br ${colors.bg} flex items-center justify-center text-white text-2xl font-black`}>
-                        {count}
-                      </div>
-                      <div className={`font-bold ${colors.text}`}>{colors.label}</div>
-                      <div className="text-sm text-gray-500">{t('vocabulary.cards')}</div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
+            <div className="text-2xl font-bold text-purple-600">{decks.length}</div>
+            <div className="text-sm text-gray-600">卡组</div>
           </motion.div>
         </div>
 
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50"
-        >
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">🃏 {t('vocabulary.allCards')}</h2>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowCreateCard(true)}
-              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl font-bold shadow-lg hover:from-purple-600 hover:to-pink-600 transition-all"
-            >
-              + {t('vocabulary.addCard')}
-            </motion.button>
-          </div>
+        {/* Review Button */}
+        {dueCards.length > 0 && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => router.push('/vocabulary/review')}
+            className="w-full mb-8 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-bold text-lg shadow-lg"
+          >
+            开始复习 ({dueCards.length} 张卡片待复习)
+          </motion.button>
+        )}
 
-          {cards.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="text-8xl mb-6">📝</div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">{t('vocabulary.noCards.title')}</h3>
-              <p className="text-xl text-gray-600 mb-8">{t('vocabulary.noCards.subtitle')}</p>
+        {/* Tabs */}
+        <div className="flex gap-4 mb-6">
+          <button
+            onClick={() => setActiveTab('cards')}
+            className={`px-6 py-2 rounded-lg font-medium transition-all ${
+              activeTab === 'cards'
+                ? 'bg-blue-500 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            词汇库
+          </button>
+          <button
+            onClick={() => setActiveTab('decks')}
+            className={`px-6 py-2 rounded-lg font-medium transition-all ${
+              activeTab === 'decks'
+                ? 'bg-blue-500 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            卡组
+          </button>
+        </div>
+
+        {activeTab === 'cards' && (
+          <>
+            {/* Search and Add */}
+            <div className="flex gap-4 mb-6">
+              <input
+                type="text"
+                placeholder="搜索词汇..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="flex-1 px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setShowCreateCard(true)}
-                className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl font-bold text-lg shadow-lg"
+                onClick={() => setShowAddModal(true)}
+                className="px-6 py-2 bg-green-500 text-white rounded-lg font-medium"
               >
-                {t('vocabulary.noCards.createFirst')}
+                添加词汇
               </motion.button>
             </div>
-          ) : (
-            <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-            >
-              {cards.map((card) => {
-                const colors = masteryColors[card.mastery_level];
-                return (
-                  <motion.div
-                    key={card.id}
-                    variants={itemVariants}
-                    whileHover={{ y: -8, scale: 1.02 }}
-                    className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100"
-                  >
-                    <div className={`h-3 bg-gradient-to-r ${colors.bg}`} />
-                    <div className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${colors.light} ${colors.text}`}>
-                          {colors.label}
-                        </span>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleDeleteCard(card.id)}
-                            className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                          >
-                            🗑️
-                          </button>
-                        </div>
-                      </div>
-                      <div className="text-xl font-bold text-gray-900 mb-3">{card.front}</div>
-                      <div className="text-gray-600">{card.back}</div>
-                      {card.example && (
-                        <div className="mt-3 text-sm text-gray-500 italic border-l-3 border-purple-300 pl-3">
-                          "{card.example}"
-                        </div>
-                      )}
-                      <div className="mt-4 pt-4 border-t border-gray-100">
-                        <div className="text-xs text-gray-400 flex items-center justify-between">
-                          <span>{t('vocabulary.reviewedCount', { count: card.review_count })}</span>
-                          <span>{t('vocabulary.correctCount', { correct: card.correct_count, total: card.review_count })}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
-          )}
-        </motion.div>
-      </div>
 
-      {showCreateCard && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full"
-          >
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">{t('vocabulary.addCardModal.title')}</h3>
-            <form onSubmit={handleCreateCard}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">{t('vocabulary.addCardModal.frontLabel')}</label>
-                  <input
-                    type="text"
-                    value={newCard.front}
-                    onChange={(e) => setNewCard({ ...newCard, front: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500"
-                    placeholder={t('vocabulary.addCardModal.frontPlaceholder')}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">{t('vocabulary.addCardModal.backLabel')}</label>
-                  <input
-                    type="text"
-                    value={newCard.back}
-                    onChange={(e) => setNewCard({ ...newCard, back: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500"
-                    placeholder={t('vocabulary.addCardModal.backPlaceholder')}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">{t('vocabulary.addCardModal.exampleLabel')}</label>
-                  <textarea
-                    value={newCard.example}
-                    onChange={(e) => setNewCard({ ...newCard, example: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500"
-                    placeholder={t('vocabulary.addCardModal.examplePlaceholder')}
-                    rows={3}
-                  />
-                </div>
-              </div>
-              <div className="flex gap-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateCard(false)}
-                  className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200"
+            {/* Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredCards.map((card, index) => (
+                <motion.div
+                  key={card.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow"
                 >
-                  {t('common.cancel')}
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold"
-                >
-                  {t('vocabulary.addCardModal.submit')}
-                </button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
+                  <div className="flex justify-between items-start mb-2">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${masteryColors[card.mastery_level]}`}>
+                      {masteryLabels[card.mastery_level]}
+                    </span>
+                    <button
+                      onClick={() => handleDeleteCard(card.id)}
+                      className="text-gray-400 hover:text-red-500"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div className="text-lg font-bold text-gray-900 mb-1">{card.front}</div>
+                  <div className="text-gray-600 mb-2">{card.back}</div>
+                  {card.example && (
+                    <div className="text-sm text-gray-500 italic">"{card.example}"</div>
+                  )}
+                  <div className="mt-3 flex justify-between text-xs text-gray-400">
+                    <span>复习 {card.review_count} 次</span>
+                    <span>
+                      正确率 {card.review_count > 0 
+                        ? Math.round((card.correct_count / card.review_count) * 100) 
+                        : 0}%
+                    </span>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
 
-      {showCreateDeck && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full"
+            {filteredCards.length === 0 && (
+              <div className="text-center py-12 text-gray-500">
+                {searchTerm ? '没有找到匹配的词汇' : '还没有词汇卡片，点击上方按钮添加'}
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'decks' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {decks.map((deck, index) => (
+              <motion.div
+                key={deck.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow cursor-pointer"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="font-bold text-gray-900">{deck.name}</h3>
+                  {deck.is_auto && (
+                    <span className="px-2 py-0.5 bg-blue-100 text-blue-600 text-xs rounded">
+                      自动
+                    </span>
+                  )}
+                </div>
+                {deck.description && (
+                  <p className="text-sm text-gray-600 mb-2">{deck.description}</p>
+                )}
+                <div className="text-sm text-gray-500">{deck.card_count} 张卡片</div>
+              </motion.div>
+            ))}
+
+            {decks.length === 0 && (
+              <div className="col-span-full text-center py-12 text-gray-500">
+                还没有卡组
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      {/* Add Card Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-xl p-6 w-full max-w-md"
           >
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">{t('vocabulary.createDeckModal.title')}</h3>
-            <form onSubmit={handleCreateDeck}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">{t('vocabulary.createDeckModal.nameLabel')}</label>
-                  <input
-                    type="text"
-                    value={newDeck.name}
-                    onChange={(e) => setNewDeck({ ...newDeck, name: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500"
-                    placeholder={t('vocabulary.createDeckModal.namePlaceholder')}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">{t('vocabulary.createDeckModal.descriptionLabel')}</label>
-                  <textarea
-                    value={newDeck.description}
-                    onChange={(e) => setNewDeck({ ...newDeck, description: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500"
-                    placeholder={t('vocabulary.createDeckModal.descriptionPlaceholder')}
-                    rows={3}
-                  />
-                </div>
+            <h2 className="text-xl font-bold mb-4">添加新词汇</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">正面 (词汇)</label>
+                <input
+                  type="text"
+                  value={newCard.front}
+                  onChange={(e) => setNewCard({ ...newCard, front: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500"
+                  placeholder="例如: hello"
+                />
               </div>
-              <div className="flex gap-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateDeck(false)}
-                  className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200"
-                >
-                  {t('common.cancel')}
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold"
-                >
-                  {t('vocabulary.createDeckModal.submit')}
-                </button>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">背面 (释义)</label>
+                <input
+                  type="text"
+                  value={newCard.back}
+                  onChange={(e) => setNewCard({ ...newCard, back: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500"
+                  placeholder="例如: 你好"
+                />
               </div>
-            </form>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">例句 (可选)</label>
+                <textarea
+                  value={newCard.example}
+                  onChange={(e) => setNewCard({ ...newCard, example: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500"
+                  rows={2}
+                  placeholder="例如: Hello, how are you?"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleAddCard}
+                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg font-medium"
+              >
+                添加
+              </button>
+            </div>
           </motion.div>
         </div>
       )}

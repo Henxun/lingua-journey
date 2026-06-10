@@ -1,31 +1,51 @@
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import Head from 'next/head';
-import { vocabularyAPI, VocabularyCard } from '../../lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowIcon } from '@/components/ArrowIcon';
+import { useRouter } from 'next/router';
 import { Navbar } from '../../components/Navbar';
 
-const reviewQualities = [
-  { value: 0, label: 'Again', color: 'from-red-500 to-rose-600', description: 'I forgot it' },
-  { value: 1, label: 'Hard', color: 'from-orange-500 to-amber-600', description: 'It was difficult' },
-  { value: 2, label: 'Good', color: 'from-green-500 to-emerald-600', description: 'I remembered' },
-  { value: 3, label: 'Easy', color: 'from-blue-500 to-indigo-600', description: 'Too easy' },
-];
+interface VocabularyCard {
+  id: string;
+  front: string;
+  back: string;
+  example?: string;
+  mastery_level: string;
+  ease_factor: number;
+  interval: number;
+  repetitions: number;
+}
 
-const cardVariants = {
-  front: { rotateY: 0 },
-  back: { rotateY: 180 },
+type ReviewQuality = 'again' | 'hard' | 'good' | 'easy';
+
+const qualityLabels: Record<ReviewQuality, string> = {
+  again: '重来',
+  hard: '困难',
+  good: '良好',
+  easy: '简单'
 };
 
-export default function VocabularyReview() {
+const qualityColors: Record<ReviewQuality, string> = {
+  again: 'bg-red-500 hover:bg-red-600',
+  hard: 'bg-orange-500 hover:bg-orange-600',
+  good: 'bg-blue-500 hover:bg-blue-600',
+  easy: 'bg-green-500 hover:bg-green-600'
+};
+
+export default function VocabularyReviewPage() {
   const router = useRouter();
   const [cards, setCards] = useState<VocabularyCard[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [reviewing, setReviewing] = useState(true);
-  const [correctCount, setCorrectCount] = useState(0);
+  const [reviewedCount, setReviewedCount] = useState(0);
+  const [sessionStats, setSessionStats] = useState({
+    again: 0,
+    hard: 0,
+    good: 0,
+    easy: 0
+  });
+
+  const currentCard = cards[currentIndex];
+  const progress = cards.length > 0 ? ((reviewedCount / cards.length) * 100) : 0;
 
   useEffect(() => {
     fetchDueCards();
@@ -33,252 +53,249 @@ export default function VocabularyReview() {
 
   const fetchDueCards = async () => {
     try {
-      setLoading(true);
-      const data = await vocabularyAPI.getDueCards();
-      if (data.length === 0) {
-        setReviewing(false);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/login');
+        return;
       }
-      setCards(data);
+
+      const response = await fetch('/api/vocabulary/review/due', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCards(data.cards || []);
+      }
     } catch (error) {
-      console.error('Failed to load due cards:', error);
+      console.error('Failed to fetch due cards:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleReview = async (quality: number) => {
-    if (currentIndex >= cards.length) return;
+  const submitReview = async (quality: ReviewQuality) => {
+    if (!currentCard) return;
 
-    const card = cards[currentIndex];
     try {
-      await vocabularyAPI.reviewCard(card.id, quality);
-      if (quality >= 2) {
-        setCorrectCount(prev => prev + 1);
-      }
+      const token = localStorage.getItem('token');
+      const qualityMap: Record<ReviewQuality, number> = {
+        again: 0,
+        hard: 1,
+        good: 2,
+        easy: 3
+      };
 
-      if (currentIndex === cards.length - 1) {
-        setReviewing(false);
-      } else {
-        setCurrentIndex(prev => prev + 1);
-        setIsFlipped(false);
+      const response = await fetch(`/api/vocabulary/cards/${currentCard.id}/review`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ quality: qualityMap[quality] })
+      });
+
+      if (response.ok) {
+        setSessionStats(prev => ({ ...prev, [quality]: prev[quality] + 1 }));
+        setReviewedCount(prev => prev + 1);
+        
+        // Move to next card
+        if (currentIndex < cards.length - 1) {
+          setCurrentIndex(prev => prev + 1);
+          setIsFlipped(false);
+        } else {
+          // Session complete
+          router.push('/vocabulary');
+        }
       }
     } catch (error) {
-      console.error('Failed to review card:', error);
+      console.error('Failed to submit review:', error);
+    }
+  };
+
+  const skipCard = () => {
+    if (currentIndex < cards.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+      setIsFlipped(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50">
-        <Head>
-          <title>Vocabulary Review - Lingua Journey</title>
-        </Head>
-        <Navbar />
-        <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full"
-          />
-        </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
       </div>
     );
   }
 
-  if (!reviewing || cards.length === 0) {
+  if (cards.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50">
-        <Head>
-          <title>Vocabulary Review - Lingua Journey</title>
-        </Head>
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <div className="flex items-center justify-center py-16 px-4 min-h-[calc(100vh-80px)]">
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="max-w-2xl w-full text-center"
-          >
-            <div className="text-9xl mb-8">🎉</div>
-            <h1 className="text-5xl font-black text-gray-900 mb-6">Review Complete!</h1>
-            <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border border-white/50 mb-8">
-              <div className="grid grid-cols-2 gap-8">
-                <div>
-                  <div className="text-6xl font-black text-indigo-600 mb-3">{cards.length}</div>
-                  <div className="text-xl text-gray-600">Cards Reviewed</div>
-                </div>
-                <div>
-                  <div className="text-6xl font-black text-green-600 mb-3">{correctCount}</div>
-                  <div className="text-xl text-gray-600">Correct Answers</div>
-                </div>
-              </div>
-              {cards.length > 0 && (
-                <div className="mt-8 pt-8 border-t border-gray-200">
-                  <div className="text-3xl font-bold text-gray-900 mb-2">
-                    {Math.round((correctCount / cards.length) * 100)}% Success Rate
-                  </div>
-                  <div className="text-lg text-gray-600">Excellent work!</div>
-                </div>
-              )}
-            </div>
-            <div className="flex gap-4 justify-center">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => router.push('/vocabulary')}
-                    className="px-8 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold text-lg hover:bg-gray-200 transition-all shadow-lg flex items-center gap-2"
-                  >
-                    <ArrowIcon direction="left" color="gray" /> Back to Cards
-                  </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  fetchDueCards();
-                  setCurrentIndex(0);
-                  setCorrectCount(0);
-                  setIsFlipped(false);
-                }}
-                className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl font-bold text-lg hover:from-indigo-600 hover:to-purple-700 transition-all shadow-lg"
-              >
-                Review Again
-              </motion.button>
-            </div>
-          </motion.div>
-        </div>
+        <main className="max-w-4xl mx-auto px-4 py-8">
+          <div className="text-center py-20">
+            <div className="text-6xl mb-4">🎉</div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">太棒了！</h1>
+            <p className="text-gray-600 mb-6">现在没有需要复习的词汇</p>
+            <button
+              onClick={() => router.push('/vocabulary')}
+              className="px-6 py-3 bg-blue-500 text-white rounded-lg font-medium"
+            >
+              返回词汇库
+            </button>
+          </div>
+        </main>
       </div>
     );
   }
-
-  const currentCard = cards[currentIndex];
-  const progress = ((currentIndex + 1) / cards.length) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50">
-      <Head>
-        <title>Vocabulary Review - Lingua Journey</title>
-      </Head>
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="py-12 px-4">
-        <div className="max-w-4xl mx-auto">
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h1 className="text-3xl font-black text-gray-900">🎯 Review Session</h1>
-                <p className="text-lg text-gray-600">Card {currentIndex + 1} of {cards.length}</p>
-              </div>
-            </div>
-            <div className="w-full h-4 bg-white/50 rounded-full overflow-hidden shadow-inner">
-              <motion.div 
-                className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.5 }}
-              />
-            </div>
-          </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="perspective-1000"
-        >
-          <div className="relative w-full h-[500px] cursor-pointer">
-            <motion.div
-              className="w-full h-full preserve-3d relative"
-              animate={isFlipped ? 'back' : 'front'}
-              variants={cardVariants}
-              transition={{ duration: 0.6, type: 'spring', stiffness: 260, damping: 20 }}
-              onClick={() => setIsFlipped(!isFlipped)}
-            >
-              <div className="absolute w-full h-full backface-hidden bg-white rounded-3xl shadow-2xl p-12 flex flex-col justify-center items-center border border-gray-100">
-                <div className="text-sm font-semibold text-indigo-600 mb-6 uppercase tracking-wider">Front</div>
-                <div className="text-4xl font-black text-gray-900 text-center mb-6">{currentCard.front}</div>
-                {currentCard.example && !isFlipped && (
-                  <div className="text-lg text-gray-500 italic text-center max-w-lg">
-                    "{currentCard.example}"
-                  </div>
-                )}
-                <div className="mt-8 text-gray-400 text-sm">Click to flip</div>
-              </div>
-              <div className="absolute w-full h-full backface-hidden bg-gradient-to-br from-indigo-50 to-purple-50 rounded-3xl shadow-2xl p-12 flex flex-col justify-center items-center border border-indigo-100 rotate-y-180">
-                <div className="text-sm font-semibold text-purple-600 mb-6 uppercase tracking-wider">Back</div>
-                <div className="text-3xl font-bold text-gray-900 text-center mb-8">{currentCard.back}</div>
-                {currentCard.example && (
-                  <div className="text-lg text-gray-500 italic text-center max-w-lg">
-                    "{currentCard.example}"
-                  </div>
-                )}
-                <div className="mt-8 text-gray-400 text-sm">Click to flip back</div>
-              </div>
-            </motion.div>
+      
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        {/* Progress Header */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="text-2xl font-bold text-gray-900">词汇复习</h1>
+            <span className="text-gray-600">
+              {reviewedCount + 1} / {cards.length}
+            </span>
           </div>
-        </motion.div>
-
-        <AnimatePresence>
-          {isFlipped && (
+          <div className="w-full bg-gray-200 rounded-full h-2">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="mt-12"
-            >
-              <h3 className="text-xl font-bold text-gray-900 text-center mb-6">How well did you remember?</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {reviewQualities.map((quality) => (
-                  <motion.button
-                    key={quality.value}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleReview(quality.value)}
-                    className={`p-6 rounded-2xl font-bold text-white shadow-lg bg-gradient-to-r ${quality.color} hover:shadow-xl transition-all`}
-                  >
-                    <div className="text-2xl mb-2">{quality.label}</div>
-                    <div className="text-sm opacity-90">{quality.description}</div>
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className="mt-12 bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50">
-          <div className="grid grid-cols-3 gap-6 text-center">
-            <div>
-              <div className="text-3xl font-black text-indigo-600">{currentCard.repetitions}</div>
-              <div className="text-sm text-gray-600">Repetitions</div>
-            </div>
-            <div>
-              <div className="text-3xl font-black text-green-600">{currentCard.interval}d</div>
-              <div className="text-sm text-gray-600">Next Review</div>
-            </div>
-            <div>
-              <div className="text-3xl font-black text-purple-600">{currentCard.ease_factor.toFixed(2)}</div>
-              <div className="text-sm text-gray-600">Ease Factor</div>
-            </div>
-          </div>
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              className="bg-blue-500 h-2 rounded-full"
+            />
           </div>
         </div>
-      </div>
 
-      <style jsx>{`
-        .perspective-1000 {
-          perspective: 1000px;
-        }
-        .preserve-3d {
-          transform-style: preserve-3d;
-        }
-        .backface-hidden {
-          backface-visibility: hidden;
-        }
-        .rotate-y-180 {
-          transform: rotateY(180deg);
-        }
-      `}</style>
+        {/* Flashcard */}
+        <div className="flex justify-center mb-8">
+          <motion.div
+            className="relative w-full max-w-lg cursor-pointer"
+            style={{ perspective: '1000px' }}
+            onClick={() => setIsFlipped(!isFlipped)}
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={isFlipped ? 'back' : 'front'}
+                initial={{ rotateY: isFlipped ? -90 : 90, opacity: 0 }}
+                animate={{ rotateY: 0, opacity: 1 }}
+                exit={{ rotateY: isFlipped ? 90 : -90, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="bg-white rounded-2xl shadow-xl p-8 min-h-[300px] flex flex-col items-center justify-center"
+              >
+                {!isFlipped ? (
+                  <>
+                    <div className="text-4xl font-bold text-gray-900 text-center mb-4">
+                      {currentCard.front}
+                    </div>
+                    <div className="text-gray-400 text-sm">点击翻转</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold text-gray-900 text-center mb-4">
+                      {currentCard.back}
+                    </div>
+                    {currentCard.example && (
+                      <div className="text-gray-600 text-center italic">
+                        "{currentCard.example}"
+                      </div>
+                    )}
+                    <div className="mt-4 text-sm text-gray-400">
+                      复习间隔: {currentCard.interval} 天
+                    </div>
+                  </>
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Flip indicator */}
+            <div className="absolute -bottom-6 left-1/2 -translate-x-1/2">
+              <motion.div
+                animate={{ rotate: isFlipped ? 180 : 0 }}
+                className="text-gray-400"
+              >
+                ⇅
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Quality Buttons */}
+        {isFlipped && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="grid grid-cols-4 gap-3 mb-6"
+          >
+            {(Object.keys(qualityLabels) as ReviewQuality[]).map((quality) => (
+              <motion.button
+                key={quality}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => submitReview(quality)}
+                className={`py-4 text-white rounded-xl font-bold ${qualityColors[quality]}`}
+              >
+                {qualityLabels[quality]}
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
+
+        {/* Skip Button */}
+        {!isFlipped && (
+          <div className="text-center">
+            <button
+              onClick={skipCard}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              跳过这张 →
+            </button>
+          </div>
+        )}
+
+        {/* Session Stats */}
+        {reviewedCount > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-8 bg-white rounded-xl shadow-sm p-4"
+          >
+            <h3 className="font-bold text-gray-900 mb-3">本次复习统计</h3>
+            <div className="grid grid-cols-4 gap-4 text-center">
+              <div>
+                <div className="text-2xl font-bold text-red-500">{sessionStats.again}</div>
+                <div className="text-xs text-gray-500">重来</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-orange-500">{sessionStats.hard}</div>
+                <div className="text-xs text-gray-500">困难</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-blue-500">{sessionStats.good}</div>
+                <div className="text-xs text-gray-500">良好</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-green-500">{sessionStats.easy}</div>
+                <div className="text-xs text-gray-500">简单</div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Exit Button */}
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => router.push('/vocabulary')}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            结束复习
+          </button>
+        </div>
+      </main>
     </div>
   );
 }
