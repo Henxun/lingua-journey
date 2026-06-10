@@ -1,18 +1,19 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { AssessmentResult } from './AssessmentResult';
 
 export type CEFRLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
-export type SkillType = 'listening' | 'reading' | 'speaking' | 'writing';
+
+export type QuestionType = 'multiple_choice' | 'fill_in_blank' | 'short_answer';
 
 export interface Question {
   id: string;
-  type: 'multiple-choice' | 'fill-blank' | 'open-ended';
-  skill: SkillType;
-  prompt: string;
+  type: QuestionType;
+  question: string;
   options?: string[];
-  correctAnswer?: string;
-  timeLimit?: number;
-  points: number;
-  level: CEFRLevel;
+  correctAnswer: string | string[];
+  explanation: string;
+  skill: string;
+  difficulty: number;
 }
 
 @Entity('assessments')
@@ -23,34 +24,36 @@ export class Assessment {
   @Column()
   name: string;
 
-  @Column({
-    type: 'simple-enum',
-    enum: ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'],
-    default: 'A1'
-  })
+  @Column({ type: 'text', nullable: true })
+  description: string;
+
+  @Column({ type: 'simple-enum', enum: ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] })
   level: CEFRLevel;
 
-  @Column({
-    type: 'simple-array',
-    default: 'listening,reading,speaking,writting'
-  })
-  skills: SkillType[];
+  @Column('simple-array')
+  skills: string[];
 
-  @Column({ default: 30 })
-  timeLimit: number;
+  @Column({ type: 'int', default: 30 })
+  time_limit: number;
 
-  @Column({ type: 'float', default: 70 })
-  passingScore: number;
+  @Column({ type: 'int', default: 60 })
+  passing_score: number;
 
-  @Column({ type: 'simple-json' })
+  @Column({ type: 'int', default: 10 })
+  question_count: number;
+
+  @Column({ type: 'json', nullable: true })
   questions: Question[];
 
-  @Column({ default: true })
-  isActive: boolean;
+  @Column({ type: 'boolean', default: false })
+  is_template: boolean;
 
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updated_at: Date;
+
+  @OneToMany(() => AssessmentResult, result => result.assessment)
+  results: AssessmentResult[];
 }

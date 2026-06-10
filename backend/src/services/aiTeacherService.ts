@@ -1,5 +1,5 @@
 import { AppDataSource } from '../config/database';
-import { AITeacherSession, Message } from '../entities/AITeacherSession';
+import { AITeacherSession, AITeacherMessage } from '../entities/AITeacherSession';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import {
@@ -25,13 +25,20 @@ const openai = new OpenAI({
 
 const sessionRepository = AppDataSource.getRepository(AITeacherSession);
 
+export interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+}
+
 export async function createSession(
   userId: string,
   topic: string,
   context?: string
 ): Promise<AITeacherSession> {
   const session = new AITeacherSession();
-  session.userId = userId;
+  session.user_id = userId;
   session.topic = topic;
   session.context = context;
   session.messages = [];
@@ -43,14 +50,14 @@ export async function getSession(
   userId: string
 ): Promise<AITeacherSession | null> {
   return await sessionRepository.findOne({
-    where: { id: sessionId, userId }
+    where: { id: sessionId, user_id: userId }
   });
 }
 
 export async function getUserSessions(userId: string): Promise<AITeacherSession[]> {
   return await sessionRepository.find({
-    where: { userId, isActive: true },
-    order: { createdAt: 'DESC' }
+    where: { user_id: userId, is_active: true },
+    order: { created_at: 'DESC' }
   });
 }
 
@@ -65,14 +72,15 @@ export async function sendMessage(
     throw new Error('Session not found');
   }
 
-  const userMessage: Message = {
+  const now = new Date();
+  const userMessageInternal: AITeacherMessage = {
     id: Date.now().toString(),
     role: 'user',
     content: userContent,
-    timestamp: new Date()
+    timestamp: now
   };
 
-  session.messages.push(userMessage);
+  session.messages.push(userMessageInternal);
 
   const messagesForOpenAI = [
     { role: 'system' as const, content: createSystemPrompt(aiContext) },
@@ -91,15 +99,30 @@ export async function sendMessage(
 
   const assistantContent = completion.choices[0].message.content || "I'm sorry, I don't have a response right now.";
 
-  const assistantMessage: Message = {
+  const now2 = new Date();
+  const assistantMessageInternal: AITeacherMessage = {
     id: (Date.now() + 1).toString(),
     role: 'assistant',
     content: assistantContent,
-    timestamp: new Date()
+    timestamp: now2
   };
 
-  session.messages.push(assistantMessage);
+  session.messages.push(assistantMessageInternal);
   await sessionRepository.save(session);
+
+  const userMessage: Message = {
+    id: userMessageInternal.id,
+    role: userMessageInternal.role,
+    content: userMessageInternal.content,
+    timestamp: userMessageInternal.timestamp.toISOString()
+  };
+
+  const assistantMessage: Message = {
+    id: assistantMessageInternal.id,
+    role: assistantMessageInternal.role,
+    content: assistantMessageInternal.content,
+    timestamp: assistantMessageInternal.timestamp.toISOString()
+  };
 
   return { userMessage, assistantMessage };
 }

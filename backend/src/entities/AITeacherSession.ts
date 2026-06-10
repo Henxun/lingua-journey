@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { User } from './User';
 
-export interface Message {
+export interface AITeacherMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
@@ -13,20 +14,29 @@ export class AITeacherSession {
   id: string;
 
   @Column()
-  userId: string;
+  user_id: string;
 
-  @Column()
+  @Column({ type: 'text', nullable: true })
   topic: string;
 
   @Column({ type: 'text', nullable: true })
-  context?: string;
+  context: string;
 
-  @Column({ type: 'simple-json', default: '[]' })
-  messages: Message[];
+  @Column({ type: 'json', nullable: true })
+  messages: AITeacherMessage[];
 
-  @Column({ default: true })
-  isActive: boolean;
+  @Column({ type: 'boolean', default: true })
+  is_active: boolean;
+
+  @Column({ type: 'int', default: 0 })
+  message_count: number;
 
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
+
+  @ManyToOne(() => User, user => user.ai_teacher_sessions)
+  user: User;
 }

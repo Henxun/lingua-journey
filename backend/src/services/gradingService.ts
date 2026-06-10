@@ -1,5 +1,4 @@
-import { Question, CEFRLevel, SkillType } from '../entities/Assessment';
-import { Answer, SkillScores } from '../entities/AssessmentResult';
+import { Question, CEFRLevel } from '../entities/Assessment';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 
@@ -15,12 +14,22 @@ interface GradingResult {
   feedback: string;
 }
 
+export interface Answer {
+  questionId: string;
+  answer: string;
+  isCorrect?: boolean;
+  score?: number;
+  feedback?: string;
+}
+
+export type SkillScores = Record<string, number>;
+
 export function gradeMultipleChoice(
   question: Question,
   userAnswer: string
 ): GradingResult {
-  const isCorrect = userAnswer === question.correctAnswer;
-  const score = isCorrect ? question.points : 0;
+  const isCorrect = String(userAnswer).toLowerCase() === String(question.correctAnswer).toLowerCase();
+  const score = isCorrect ? 10 : 0;
 
   return {
     isCorrect,
@@ -36,9 +45,12 @@ export function gradeFillBlank(
   userAnswer: string
 ): GradingResult {
   const normalizedUser = userAnswer.toLowerCase().trim();
-  const normalizedCorrect = (question.correctAnswer || '').toLowerCase().trim();
+  const correctAnswer = Array.isArray(question.correctAnswer) 
+    ? question.correctAnswer.join(',') 
+    : (question.correctAnswer || '');
+  const normalizedCorrect = correctAnswer.toLowerCase().trim();
   const isCorrect = normalizedUser === normalizedCorrect;
-  const score = isCorrect ? question.points : 0;
+  const score = isCorrect ? 10 : 0;
 
   return {
     isCorrect,
@@ -55,7 +67,7 @@ export async function gradeOpenEnded(
   level: CEFRLevel
 ): Promise<GradingResult> {
   try {
-    const prompt = `Grade this ${level} level answer to the question: "${question.prompt}"
+    const prompt = `Grade this ${level} level answer to the question: "${question.question}"
 
 Student answer: "${userAnswer}"
 
@@ -78,13 +90,13 @@ Return JSON with fields: score (number), feedback (string), isCorrect (boolean)`
     const data = JSON.parse(content);
     return {
       isCorrect: data.isCorrect,
-      score: Math.round((data.score / 10) * question.points),
+      score: Math.round((data.score / 10) * 10),
       feedback: data.feedback
     };
   } catch {
     return {
       isCorrect: userAnswer.length > 10,
-      score: userAnswer.length > 10 ? Math.round(question.points * 0.7) : 0,
+      score: userAnswer.length > 10 ? 7 : 0,
       feedback: 'Thanks for your response!'
     };
   }
@@ -96,11 +108,11 @@ export async function gradeAnswer(
   level: CEFRLevel
 ): Promise<GradingResult> {
   switch (question.type) {
-    case 'multiple-choice':
+    case 'multiple_choice':
       return gradeMultipleChoice(question, userAnswer);
-    case 'fill-blank':
+    case 'fill_in_blank':
       return gradeFillBlank(question, userAnswer);
-    case 'open-ended':
+    case 'short_answer':
       return gradeOpenEnded(question, userAnswer, level);
     default:
       return { isCorrect: false, score: 0, feedback: 'Invalid question type' };
@@ -111,40 +123,35 @@ export function calculateSkillScores(
   questions: Question[],
   answers: Answer[]
 ): SkillScores {
-  const skillScores: Record<SkillType, { total: number; earned: number }> = {
-    listening: { total: 0, earned: 0 },
-    reading: { total: 0, earned: 0 },
-    speaking: { total: 0, earned: 0 },
-    writing: { total: 0, earned: 0 }
-  };
+  const skillScoreMap: Record<string, { total: number; earned: number }> = {};
 
   for (const question of questions) {
+    if (!skillScoreMap[question.skill]) {
+      skillScoreMap[question.skill] = { total: 0, earned: 0 };
+    }
+    skillScoreMap[question.skill].total += 10;
+    
     const answer = answers.find(a => a.questionId === question.id);
     if (answer) {
-      skillScores[question.skill].total += question.points;
-      skillScores[question.skill].earned += answer.score || 0;
+      skillScoreMap[question.skill].earned += answer.score || 0;
     }
   }
 
-  return {
-    listening: skillScores.listening.total > 0
-      ? Math.round((skillScores.listening.earned / skillScores.listening.total) * 100)
-      : 0,
-    reading: skillScores.reading.total > 0
-      ? Math.round((skillScores.reading.earned / skillScores.reading.total) * 100)
-      : 0,
-    speaking: skillScores.speaking.total > 0
-      ? Math.round((skillScores.speaking.earned / skillScores.speaking.total) * 100)
-      : 0,
-    writing: skillScores.writing.total > 0
-      ? Math.round((skillScores.writing.earned / skillScores.writing.total) * 100)
-      : 0
-  };
+  const result: SkillScores = {};
+  for (const [skill, scores] of Object.entries(skillScoreMap)) {
+    result[skill] = scores.total > 0 
+      ? Math.round((scores.earned / scores.total) * 100)
+      : 0;
+  }
+
+  return result;
 }
 
 export function calculateOverallScore(skillScores: SkillScores): number {
-  const scores = Object.values(skillScores) as number[];
-  return Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+  const scores = Object.values(skillScores);
+  return scores.length > 0
+    ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+    : 0;
 }
 
 export function determineRecommendedLevel(score: number): CEFRLevel {

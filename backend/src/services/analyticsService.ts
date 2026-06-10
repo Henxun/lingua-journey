@@ -16,11 +16,11 @@ export interface LearningInsights {
 
 export async function getLearningInsights(userId: string): Promise<LearningInsights> {
   const results = await resultRepository.find({
-    where: { userId },
-    order: { createdAt: 'DESC' }
+    where: { user_id: userId },
+    order: { completed_at: 'DESC' }
   });
 
-  const profiles = await skillProfileRepository.find({ where: { userId } });
+  const profiles = await skillProfileRepository.find({ where: { user_id: userId } });
 
   const averageScore = results.length > 0
     ? Math.round(results.reduce((sum, r) => sum + r.score, 0) / results.length)
@@ -35,7 +35,7 @@ export async function getLearningInsights(userId: string): Promise<LearningInsig
     : 'N/A';
 
   const weeklyProgress = results.slice(0, 7).map(r => ({
-    date: r.completedAt?.toISOString().split('T')[0] || r.createdAt.toISOString().split('T')[0],
+    date: r.completed_at?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
     score: r.score
   })).reverse();
 
@@ -51,10 +51,7 @@ export async function getLearningInsights(userId: string): Promise<LearningInsig
   };
 }
 
-function generateRecommendations(
-  profiles: UserSkillProfile[],
-  avgScore: number
-): string[] {
+function generateRecommendations(profiles: UserSkillProfile[], avgScore: number): string[] {
   const recommendations: string[] = [];
 
   if (avgScore < 70) {
@@ -66,7 +63,7 @@ function generateRecommendations(
     recommendations.push(`Practice ${skill.skill} more - it's an area for growth!`);
   }
 
-  const improvingSkills = profiles.filter(p => p.trend === 'improving');
+  const improvingSkills = profiles.filter(p => p.trend === 1);
   if (improvingSkills.length > 0) {
     recommendations.push(`Great progress in ${improvingSkills.map(s => s.skill).join(', ')}!`);
   }
@@ -78,22 +75,17 @@ function generateRecommendations(
   return recommendations;
 }
 
-export async function getProgressTrend(
-  userId: string,
-  skill?: string
-): Promise<{ date: Date; score: number }[]> {
+export async function getProgressTrend(userId: string, skill?: string): Promise<{ date: Date; score: number }[]> {
   const qb = resultRepository
     .createQueryBuilder('result')
-    .where('result.userId = :userId', { userId })
-    .orderBy('result.createdAt', 'DESC')
+    .where('result.user_id = :userId', { userId })
+    .orderBy('result.completed_at', 'DESC')
     .limit(30);
 
   const results = await qb.getMany();
 
   return results.map(r => ({
-    date: r.completedAt || r.createdAt,
-    score: skill
-      ? (r.skillScores as any)[skill] || 0
-      : r.score
+    date: r.completed_at,
+    score: skill ? (r.skill_scores as any)[skill] || 0 : r.score
   }));
 }

@@ -1,14 +1,8 @@
 import { AppDataSource } from '../config/database';
-import { Assessment, Question, CEFRLevel, SkillType } from '../entities/Assessment';
-import { AssessmentResult, Answer, SkillScores } from '../entities/AssessmentResult';
+import { Assessment, Question, CEFRLevel } from '../entities/Assessment';
+import { AssessmentResult } from '../entities/AssessmentResult';
 import { UserSkillProfile } from '../entities/UserSkillProfile';
 import { generateAssessmentQuestions } from './questionGenerator';
-import {
-  gradeAnswer,
-  calculateSkillScores,
-  calculateOverallScore,
-  determineRecommendedLevel
-} from './gradingService';
 
 const assessmentRepository = AppDataSource.getRepository(Assessment);
 const resultRepository = AppDataSource.getRepository(AssessmentResult);
@@ -17,7 +11,7 @@ const skillProfileRepository = AppDataSource.getRepository(UserSkillProfile);
 export async function createAssessment(
   name: string,
   level: CEFRLevel,
-  skills: SkillType[],
+  skills: string[],
   timeLimit: number = 30,
   passingScore: number = 70
 ): Promise<Assessment> {
@@ -27,26 +21,34 @@ export async function createAssessment(
   assessment.name = name;
   assessment.level = level;
   assessment.skills = skills;
-  assessment.timeLimit = timeLimit;
-  assessment.passingScore = passingScore;
+  assessment.time_limit = timeLimit;
+  assessment.passing_score = passingScore;
   assessment.questions = questions;
-  assessment.isActive = true;
 
   return await assessmentRepository.save(assessment);
 }
 
 export async function getAssessment(assessmentId: string): Promise<Assessment | null> {
   return await assessmentRepository.findOne({
-    where: { id: assessmentId, isActive: true }
+    where: { id: assessmentId }
   });
 }
 
 export async function getAvailableAssessments(): Promise<Assessment[]> {
   return await assessmentRepository.find({
-    where: { isActive: true },
-    order: { createdAt: 'DESC' }
+    order: { created_at: 'DESC' }
   });
 }
+
+export interface Answer {
+  questionId: string;
+  answer: string;
+  isCorrect?: boolean;
+  score?: number;
+  feedback?: string;
+}
+
+export type SkillScores = Record<string, number>;
 
 export async function submitAssessment(
   assessmentId: string,
@@ -58,39 +60,44 @@ export async function submitAssessment(
     throw new Error('Assessment not found');
   }
 
-  const gradedAnswers: Answer[] = [];
+  const gradedAnswers: Record<string, string | string[]> = {};
+  const skillScoreMap: Record<string, { total: number; correct: number }> = {};
 
   for (const question of assessment.questions) {
     const userAnswer = answers.find(a => a.questionId === question.id);
     if (userAnswer) {
-      const gradingResult = await gradeAnswer(
-        question,
-        userAnswer.answer,
-        assessment.level
-      );
-      gradedAnswers.push({
-        ...userAnswer,
-        isCorrect: gradingResult.isCorrect,
-        score: gradingResult.score,
-        feedback: gradingResult.feedback
-      });
+      gradedAnswers[question.id] = userAnswer.answer;
+      
+      if (!skillScoreMap[question.skill]) {
+        skillScoreMap[question.skill] = { total: 0, correct: 0 };
+      }
+      skillScoreMap[question.skill].total += 10;
+      
+      const isCorrect = String(userAnswer.answer).toLowerCase() === String(question.correctAnswer).toLowerCase();
+      skillScoreMap[question.skill].correct += isCorrect ? 10 : 0;
     }
   }
 
-  const skillScores = calculateSkillScores(assessment.questions, gradedAnswers);
-  const overallScore = calculateOverallScore(skillScores);
-  const recommendedLevel = determineRecommendedLevel(overallScore);
+  const skillScores: SkillScores = {};
+  for (const [skill, scores] of Object.entries(skillScoreMap)) {
+    skillScores[skill] = Math.round((scores.correct / scores.total) * 100);
+  }
+
+  const overallScore = Object.keys(skillScores).length > 0
+    ? Math.round(Object.values(skillScores).reduce((a, b) => a + b, 0) / Object.keys(skillScores).length)
+    : 0;
 
   const result = new AssessmentResult();
-  result.userId = userId;
-  result.assessmentId = assessmentId;
+  result.user_id = userId;
+  result.assessment_id = assessmentId;
   result.score = overallScore;
-  result.skillScores = skillScores;
+  result.skill_scores = skillScores;
   result.answers = gradedAnswers;
-  result.recommendedLevel = recommendedLevel;
-  result.feedback = generateOverallFeedback(overallScore, skillScores);
-  result.recommendations = generateRecommendations(skillScores);
-  result.completedAt = new Date();
+  result.feedback = {
+    overall: generateOverallFeedback(overallScore, skillScores),
+    recommendations: generateRecommendations(skillScores).join(' || ')
+  };
+  result.passed = overallScore >= assessment.passing_score;
 
   const savedResult = await resultRepository.save(result);
   await updateUserSkillProfiles(userId, skillScores);
@@ -109,8 +116,8 @@ function generateOverallFeedback(score: number, skillScores: SkillScores): strin
 function generateRecommendations(skillScores: SkillScores): string[] {
   const recommendations: string[] = [];
   const weakSkills = Object.entries(skillScores)
-    .filter(([_, score]) => score < 70)
-    .sort((a, b) => a[1] - b[1]);
+    .filter(([, score]) => score < 70)
+    .sort((a, b) => (a[1] as number) - (b[1] as number));
 
   for (const [skill] of weakSkills) {
     recommendations.push(`Focus on improving your ${skill} skills.`);
@@ -129,27 +136,27 @@ async function updateUserSkillProfiles(
 ): Promise<void> {
   for (const [skill, score] of Object.entries(skillScores)) {
     let profile = await skillProfileRepository.findOne({
-      where: { userId, skill: skill as SkillType }
+      where: { user_id: userId, skill }
     });
 
     if (!profile) {
       profile = new UserSkillProfile();
-      profile.userId = userId;
-      profile.skill = skill as SkillType;
-      profile.historicalScores = [];
+      profile.user_id = userId;
+      profile.skill = skill;
+      profile.level = score >= 80 ? 'advanced' : score >= 60 ? 'intermediate' : 'beginner';
     }
 
-    const now = new Date();
-    profile.historicalScores.push({ date: now, score });
+    const prevScore = profile.score;
     profile.score = score;
-    profile.lastAssessed = now;
+    profile.last_assessed = new Date();
+    profile.practice_count += 1;
+    
+    if (score >= 60) {
+      profile.correct_count += 1;
+    }
 
-    if (profile.historicalScores.length >= 3) {
-      const last3 = profile.historicalScores.slice(-3);
-      const avgPrev = (last3[0].score + last3[1].score) / 2;
-      if (score > avgPrev + 5) profile.trend = 'improving';
-      else if (score < avgPrev - 5) profile.trend = 'declining';
-      else profile.trend = 'stable';
+    if (prevScore > 0) {
+      profile.trend = score > prevScore + 5 ? 1 : score < prevScore - 5 ? -1 : 0;
     }
 
     await skillProfileRepository.save(profile);
@@ -158,11 +165,11 @@ async function updateUserSkillProfiles(
 
 export async function getUserResults(userId: string): Promise<AssessmentResult[]> {
   return await resultRepository.find({
-    where: { userId },
-    order: { createdAt: 'DESC' }
+    where: { user_id: userId },
+    order: { completed_at: 'DESC' }
   });
 }
 
 export async function getUserSkillProfiles(userId: string): Promise<UserSkillProfile[]> {
-  return await skillProfileRepository.find({ where: { userId } });
+  return await skillProfileRepository.find({ where: { user_id: userId } });
 }

@@ -1,7 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { CEFRLevel, SkillType } from './Assessment';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { User } from './User';
 
-export type SkillTrend = 'improving' | 'stable' | 'declining';
+export type SkillLevel = 'beginner' | 'elementary' | 'intermediate' | 'upper_intermediate' | 'advanced' | 'master';
 
 @Entity('user_skill_profiles')
 export class UserSkillProfile {
@@ -9,40 +9,35 @@ export class UserSkillProfile {
   id: string;
 
   @Column()
-  userId: string;
+  user_id: string;
 
-  @Column({
-    type: 'simple-enum',
-    enum: ['listening', 'reading', 'speaking', 'writing']
-  })
-  skill: SkillType;
+  @Column()
+  skill: string;
 
-  @Column({
-    type: 'simple-enum',
-    enum: ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'],
-    default: 'A1'
-  })
-  level: CEFRLevel;
+  @Column({ type: 'simple-enum', enum: ['beginner', 'elementary', 'intermediate', 'upper_intermediate', 'advanced', 'master'] })
+  level: SkillLevel;
 
   @Column({ type: 'float', default: 0 })
   score: number;
 
+  @Column({ type: 'int', default: 0 })
+  practice_count: number;
+
+  @Column({ type: 'int', default: 0 })
+  correct_count: number;
+
+  @Column({ type: 'float', default: 0 })
+  trend: number;
+
   @Column({ type: 'datetime', nullable: true })
-  lastAssessed?: Date;
-
-  @Column({
-    type: 'simple-enum',
-    enum: ['improving', 'stable', 'declining'],
-    default: 'stable'
-  })
-  trend: SkillTrend;
-
-  @Column({ type: 'simple-json', default: '[]' })
-  historicalScores: { date: Date; score: number }[];
+  last_assessed: Date;
 
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updated_at: Date;
+
+  @ManyToOne(() => User, user => user.skill_profiles)
+  user: User;
 }

@@ -1,4 +1,4 @@
-import { CEFRLevel, SkillType, Question } from '../entities/Assessment';
+import { CEFRLevel, Question, QuestionType } from '../entities/Assessment';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 
@@ -9,8 +9,8 @@ const openai = new OpenAI({
 });
 
 interface QuestionTemplate {
-  skill: SkillType;
-  type: 'multiple-choice' | 'fill-blank' | 'open-ended';
+  skill: string;
+  type: QuestionType;
   level: CEFRLevel;
   topic?: string;
 }
@@ -19,32 +19,24 @@ export async function generateQuestion(template: QuestionTemplate): Promise<Ques
   const id = Date.now().toString();
   const topic = template.topic || 'general language';
 
-  const baseQuestion: Question = {
-    id,
-    type: template.type,
-    skill: template.skill,
-    prompt: '',
-    points: 10,
-    level: template.level
-  };
-
-  if (template.type === 'multiple-choice') {
-    return generateMultipleChoice(template, baseQuestion);
-  } else if (template.type === 'fill-blank') {
-    return generateFillBlank(template, baseQuestion);
+  if (template.type === 'multiple_choice') {
+    return generateMultipleChoice(template, id);
+  } else if (template.type === 'fill_in_blank') {
+    return generateFillBlank(template, id);
   } else {
-    return generateOpenEnded(template, baseQuestion);
+    return generateShortAnswer(template, id);
   }
 }
 
-async function generateMultipleChoice(template: QuestionTemplate, base: Question): Promise<Question> {
+async function generateMultipleChoice(template: QuestionTemplate, id: string): Promise<Question> {
   try {
     const prompt = `Generate a ${template.level} level ${template.skill} multiple-choice question about ${template.topic || 'general language use'}.
 
 Return ONLY a JSON object with:
-- "prompt": The question text
+- "question": The question text
 - "options": Array of 4 options
 - "correctAnswer": The correct option string
+- "explanation": Brief explanation of why it's correct
 
 Keep it simple and appropriate for ${template.level} level.`;
 
@@ -59,52 +51,68 @@ Keep it simple and appropriate for ${template.level} level.`;
 
     const data = JSON.parse(content);
     return {
-      ...base,
-      prompt: data.prompt,
+      id,
+      type: 'multiple_choice',
+      question: data.question,
       options: data.options,
-      correctAnswer: data.correctAnswer
+      correctAnswer: data.correctAnswer,
+      explanation: data.explanation || 'Correct answer.',
+      skill: template.skill,
+      difficulty: 1
     };
   } catch {
-    return fallbackMultipleChoice(template, base);
+    return fallbackMultipleChoice(template, id);
   }
 }
 
-function fallbackMultipleChoice(template: QuestionTemplate, base: Question): Question {
+function fallbackMultipleChoice(template: QuestionTemplate, id: string): Question {
   const vocabWords = ['apple', 'book', 'house', 'computer'];
   return {
-    ...base,
-    prompt: `Choose the correct word: "I have a red ___"`,
+    id,
+    type: 'multiple_choice',
+    question: `Choose the correct word: "I have a red ___"`,
     options: vocabWords,
-    correctAnswer: vocabWords[0]
+    correctAnswer: vocabWords[0],
+    explanation: 'Apple is the correct word to complete the sentence.',
+    skill: template.skill,
+    difficulty: 1
   };
 }
 
-async function generateFillBlank(template: QuestionTemplate, base: Question): Promise<Question> {
+async function generateFillBlank(template: QuestionTemplate, id: string): Promise<Question> {
   return {
-    ...base,
-    prompt: `Complete the sentence: "I ___ to school every day"`,
-    correctAnswer: 'go'
+    id,
+    type: 'fill_in_blank',
+    question: `Complete the sentence: "I ___ to school every day"`,
+    correctAnswer: 'go',
+    explanation: 'The correct verb is "go" to complete this present simple sentence.',
+    skill: template.skill,
+    difficulty: 1
   };
 }
 
-async function generateOpenEnded(template: QuestionTemplate, base: Question): Promise<Question> {
+async function generateShortAnswer(template: QuestionTemplate, id: string): Promise<Question> {
   return {
-    ...base,
-    prompt: `Write a short paragraph about your day.`,
-    points: 20
+    id,
+    type: 'short_answer',
+    question: `Write a short sentence using the word "${template.topic || 'happy'}".`,
+    correctAnswer: '',
+    explanation: 'Answers may vary. Look for correct grammar and usage.',
+    skill: template.skill,
+    difficulty: 2
   };
 }
 
 export async function generateAssessmentQuestions(
   level: CEFRLevel,
-  skills: SkillType[],
-  questionsPerSkill: number = 5
+  skills: string[],
+  questionsPerSkill: number = 3
 ): Promise<Question[]> {
   const questions: Question[] = [];
 
   for (const skill of skills) {
     for (let i = 0; i < questionsPerSkill; i++) {
-      const type = i % 2 === 0 ? 'multiple-choice' : (i % 3 === 0 ? 'fill-blank' : 'open-ended');
+      const type: QuestionType = i % 2 === 0 ? 'multiple_choice' : (i % 3 === 0 ? 'fill_in_blank' : 'short_answer');
       const question = await generateQuestion({
         skill,
         type,

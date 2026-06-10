@@ -1,4 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { AssessmentResult } from './AssessmentResult';
+import { AITeacherSession } from './AITeacherSession';
+import { UserSkillProfile } from './UserSkillProfile';
 
 export enum UserLevel {
   BEGINNER = 'beginner',
@@ -28,6 +31,12 @@ interface LearningStats {
   total_score: number;
   last_practice_date: string;
   streak_days: number;
+  completed_courses?: string[];
+  scenes_explored?: string[];
+  conversation_count?: number;
+  assessments_passed?: number;
+  vocabulary_mastered?: number;
+  ai_teacher_interactions?: number;
 }
 
 interface GamificationData {
@@ -98,4 +107,13 @@ export class User {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @OneToMany(() => AssessmentResult, result => result.user)
+  assessment_results: AssessmentResult[];
+
+  @OneToMany(() => AITeacherSession, session => session.user)
+  ai_teacher_sessions: AITeacherSession[];
+
+  @OneToMany(() => UserSkillProfile, profile => profile.user)
+  skill_profiles: UserSkillProfile[];
 }
