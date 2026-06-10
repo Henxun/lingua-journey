@@ -1,5 +1,5 @@
 workflow: full
-phase: verify
+phase: archive
 build_mode: subagent-driven-development
 build_pause: null
 isolation: branch
@@ -7,11 +7,54 @@ verify_mode: full
 base_ref: f1600b5f30e147e6366009e1ea052cc291436e84
 design_doc: docs/superpowers/specs/2026-06-09-player-character-movement-design.md
 plan: docs/superpowers/plans/2026-06-09-player-character-movement.md
-verify_result: pending
-verification_report: null
-branch_status: pending
+verify_result: pass
+verification_report: |-
+  === 验证报告 ===
+  变更: player-character-movement（玩家可控角色 + 3D场景移动 + 接近触发语音对话）
+  分支: player-character-movement -> main (merge commit)
+
+  一、构建验证
+  - [PASS] 前端 npm run build: Next.js 14.2.35，23/23 页面全部编译成功
+  - [PASS] 后端 TypeScript 检查: npx tsc --noEmit 0 errors
+
+  二、核心功能验证（对照 3 个 delta specs）
+  1. player-character spec:
+    - [PASS] usePlayerControls hook 实现 WASD 键监听 + PointerLock
+    - [PASS] 移动方向向量计算（根据相机朝向旋转）
+    - [PASS] PlayerCharacter 组件（第三人称可见、第一人称不可见）
+    - [PASS] playerFacing ref 让角色朝向移动方向旋转
+    - [PASS] 边界限制 + AABB 碰撞检测（桌椅、吧台、NPC 碰撞盒）
+    - [PASS] 第三人称 / 第一人称相机切换（isChatting 驱动）
+    - [PASS] 对话期间禁用 WASD 移动
+
+  2. proximity-trigger spec:
+    - [PASS] useProximityDetection: 每帧计算 2D 距离
+    - [PASS] isInRange 1.5 单位阈值，状态切换触发 forceUpdate
+    - [PASS] nearestNPC id/name 实时更新
+    - [PASS] InteractionPrompt 在接近 NPC 时显示 SPACE 提示
+
+  3. scene-voice-integration spec:
+    - [PASS] SPACE 键 + isInRange 条件触发对话
+    - [PASS] connectToCharacter(nearestNPC.id) 调用
+    - [PASS] 对话期间 isChatting=true 禁用移动与鼠标视角
+    - [PASS] 对话结束后恢复控制
+
+  三、代码质量
+  - TypeScript 严格类型
+  - Hooks 关注点分离: usePlayerControls / useProximityDetection / useVoiceChat
+  - React Three Fiber + drei 规范
+  - 无 console.error / 无 ESLint error
+
+  四、合并信息
+  - 86 files changed, +13,849 / -956 lines
+  - 合并到 main 分支 (merge commit, --no-ff)
+  - 同时合并了 i18n-internationalization 与 immersive-voice-chat 的并行代码
+
+  五、验收结论: PASS
+  所有核心功能按 spec 实现，构建无错误，分支已合并到 main。
+branch_status: merged
 created_at: 2026-06-09
-verified_at: null
-archived: false
+verified_at: 2026-06-10
+archived: true
 handoff_context: openspec/changes/player-character-movement/.comet/handoff/design-context.json
 handoff_hash: fede0326eb61c84aecf43dd63d58ced9744418754574bf91267ae7f7210a35bd
