@@ -95,19 +95,24 @@ export function useProximityDetection(
       }
     }
 
-    // Update refs
+    // Update refs and detect meaningful state changes
     const prevNearest = nearestNPCRef.current;
+    const prevInRange = isInRangeRef.current;
+    const newInRange = inRange.length > 0;
+
     nearestNPCRef.current = nearest;
-    isInRangeRef.current = inRange.length > 0;
+    isInRangeRef.current = newInRange;
     allInRangeRef.current = inRange;
 
-    // Force re-render only if nearest NPC changed
+    // Force re-render when nearest NPC id changes OR when in-range state flips
     const nearestChanged =
       (!prevNearest && nearest) ||
       (prevNearest && !nearest) ||
       (prevNearest && nearest && prevNearest.id !== nearest.id);
 
-    if (nearestChanged) {
+    const inRangeFlipped = prevInRange !== newInRange;
+
+    if (nearestChanged || inRangeFlipped) {
       forceUpdate({});
     }
   });

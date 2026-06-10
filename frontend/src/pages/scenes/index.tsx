@@ -462,30 +462,44 @@ interface PlayerControlsWrapperProps {
   onProximityChange: (nearestNPC: { id: string; name: string } | null, isInRange: boolean) => void;
 }
 
+/**
+ * Wraps the player controls and character rendering.
+ * View mode strategy:
+ *  - Chatting (= isChatting = true)  → FIRST-PERSON  (immersive conversation)
+ *  - Exploring (= isChatting = false) → THIRD-PERSON (see your own character)
+ */
 function PlayerControlsWrapper({ isChatting, onLockChange, onProximityChange }: PlayerControlsWrapperProps) {
-  const { playerPosition, isLocked } = usePlayerControls({ 
-    enabled: !isChatting 
+  // While chatting we disable movement but keep first-person camera
+  // While exploring we enable movement with third-person camera
+  const { playerPosition, keys, isLocked, playerFacing } = usePlayerControls({
+    enabled: !isChatting,
+    firstPerson: isChatting,
   });
-  
+
   const { nearestNPC, isInRange } = useProximityDetection(playerPosition, CHARACTERS);
-  
+
   // Report lock state changes to parent
   useEffect(() => {
     onLockChange(isLocked);
   }, [isLocked, onLockChange]);
-  
+
   // Report proximity state changes to parent
   useEffect(() => {
     onProximityChange(nearestNPC, isInRange);
   }, [nearestNPC, isInRange, onProximityChange]);
-  
+
   return (
     <>
-      <PointerLockControls 
+      <PointerLockControls
         onLock={() => onLockChange(true)}
         onUnlock={() => onLockChange(false)}
       />
-      <PlayerCharacter firstPerson={true} />
+      <PlayerCharacter
+        firstPerson={isChatting}
+        playerPosition={playerPosition}
+        keys={keys}
+        playerFacing={playerFacing}
+      />
     </>
   );
 }
