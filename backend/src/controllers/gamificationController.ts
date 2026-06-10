@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { checkIn, getGamificationProfile, getAllAchievements, getDailyQuests, getLeaderboard } from '../services/gamificationService';
+import { checkIn, getGamificationProfile, getAllAchievements, getDailyQuests, getLeaderboard, getAchievementsWithProgress, generateShareContent } from '../services/gamificationService';
 
 export async function checkInHandler(req: Request, res: Response): Promise<void> {
   try {
@@ -39,8 +39,24 @@ export async function getAchievementsHandler(req: Request, res: Response): Promi
       return;
     }
 
-    const achievements = await getAllAchievements(userId);
+    const achievements = await getAchievementsWithProgress(userId);
     res.json(achievements);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function getShareContentHandler(req: Request, res: Response): Promise<void> {
+  try {
+    const userId = (req as any).user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const achievementId = req.params.id;
+    const shareContent = await generateShareContent(userId, achievementId);
+    res.json(shareContent);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

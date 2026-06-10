@@ -190,15 +190,44 @@ export interface GamificationProfile {
   total_achievements: number;
 }
 
+export type AchievementRarity = 'common' | 'rare' | 'epic' | 'legendary';
+
 export interface Achievement {
   id: string;
   name: string;
   description: string;
   icon: string;
   category: string;
+  rarity: AchievementRarity;
   xp_reward: number;
   unlocked: boolean;
   unlocked_at: string | null;
+  progress: number;
+  current_value: number;
+  target_value: number;
+}
+
+export interface AchievementsSummary {
+  total: number;
+  unlocked: number;
+  by_rarity: Record<AchievementRarity, number>;
+}
+
+export interface AchievementsResponse {
+  achievements: Achievement[];
+  summary: AchievementsSummary;
+}
+
+export interface ShareContent {
+  title: string;
+  message: string;
+  icon: string;
+  rarity: AchievementRarity;
+  user_stats: {
+    level: number;
+    xp: number;
+    achievements_unlocked: number;
+  };
 }
 
 export interface DailyQuest {
@@ -234,8 +263,11 @@ export const gamificationAPI = {
   getProfile: (): Promise<GamificationProfile> =>
     fetchAPI('/gamification/profile'),
 
-  getAchievements: (): Promise<Achievement[]> =>
+  getAchievements: (): Promise<AchievementsResponse> =>
     fetchAPI('/gamification/achievements'),
+
+  getShareContent: (id: string): Promise<ShareContent> =>
+    fetchAPI(`/gamification/achievements/${id}/share`),
 
   getDailyQuests: (): Promise<DailyQuest[]> =>
     fetchAPI('/gamification/daily-quests'),
