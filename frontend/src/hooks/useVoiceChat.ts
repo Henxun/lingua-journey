@@ -93,6 +93,11 @@ export function useVoiceChat() {
             setEvaluation(message.payload.evaluation as EvaluationResult);
             break;
 
+          case 'character_switched':
+            addTranscript('ai', message.payload.greeting);
+            speakText(message.payload.greeting);
+            break;
+
           case 'error':
             setError(message.payload.message);
             setLocalError(message.payload.message);
@@ -209,6 +214,19 @@ export function useVoiceChat() {
     }
   }, [setLocalError]);
 
+  const switchCharacter = useCallback((characterId: string) => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      stopRecording();
+      window.speechSynthesis.cancel();
+      clearTranscript();
+      wsRef.current.send(JSON.stringify({
+        type: 'switch_character',
+        payload: { characterId }
+      }));
+      connect(characterId);
+    }
+  }, [connect, clearTranscript, stopRecording]);
+
   const endConversation = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ type: 'end_conversation' }));
@@ -251,6 +269,7 @@ export function useVoiceChat() {
     stopRecording,
     endConversation,
     sendUserMessage,
+    switchCharacter,
     clearTranscript
   };
 }
