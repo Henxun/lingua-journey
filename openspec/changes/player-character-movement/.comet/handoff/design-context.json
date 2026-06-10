@@ -1,0 +1,16 @@
+{
+  "change": "player-character-movement",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "fede0326eb61c84aecf43dd63d58ced9744418754574bf91267ae7f7210a35bd",
+  "files": [
+    { "path": "openspec/changes/player-character-movement/proposal.md", "sha256": "08ae7c84304a604f91435be4188e6edbb68b41a24df896be5da0cb893a8a9f7c" },
+    { "path": "openspec/changes/player-character-movement/design.md", "sha256": "4b650abe0666bf59a427acbbff5cb634d43d78188adb30896fe628561247d491" },
+    { "path": "openspec/changes/player-character-movement/tasks.md", "sha256": "00a2575cd95a984ec0e667a45c2f0d2a433998f72d3c7e17515019a89bb9225b" },
+    { "path": "openspec/changes/player-character-movement/specs/player-character/spec.md", "sha256": "e3194737a846c1bd4aebf58a3575bb0f71afdebe17d4443368f075aff5164287" },
+    { "path": "openspec/changes/player-character-movement/specs/proximity-trigger/spec.md", "sha256": "6c71a6c273a45b1fbae6694480add5265b9d99dc12228b4a0ebddc9dacd169a2" },
+    { "path": "openspec/changes/player-character-movement/specs/scene-voice-integration/spec.md", "sha256": "3323ace4058e7157d78e027a954375b2d514ba31d734aefacace0f77bc55ea80" }
+  ]
+}

@@ -9,6 +9,10 @@ interface User {
   auth_provider?: string;
   email_verified?: boolean;
   oauth_profiles?: any;
+  targetLanguage?: string;
+  nativeLanguage?: string;
+  target_language?: string;
+  native_language?: string;
 }
 
 interface AuthContextType {

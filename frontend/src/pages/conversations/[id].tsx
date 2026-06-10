@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import Head from 'next/head';
 import { motion } from 'framer-motion';
 import { conversationAPI, ConversationMessage, ConversationSession } from '../../lib/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { ArrowIcon } from '@/components/ArrowIcon';
+import { Navbar } from '../../components/Navbar';
 
 export default function ConversationPractice() {
   const router = useRouter();
@@ -112,21 +115,16 @@ export default function ConversationPractice() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <Head>
+        <title>Conversation Practice - Lingua Journey</title>
+      </Head>
+      <Navbar />
+      
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-xl shadow-sm border-b border-white/20 sticky top-0 z-50">
+      <div className="bg-white/80 backdrop-blur-xl shadow-sm border-b border-white/20 sticky top-16 z-40">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Link
-                  href={`/courses/${session?.lesson_id || ''}`}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-gray-700 font-medium transition-colors"
-                >
-                  ← Back
-                </Link>
-              </motion.div>
-              <h1 className="text-xl font-bold text-gray-900">AI Conversation Practice</h1>
-            </div>
+            <h1 className="text-xl font-bold text-gray-900">AI Conversation Practice</h1>
             {!completed && (
               <motion.button
                 whileHover={{ scale: 1.05 }}

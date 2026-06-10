@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import { vocabularyAPI, VocabularyCard } from '../../lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowIcon } from '@/components/ArrowIcon';
+import { Navbar } from '../../components/Navbar';
 
 const reviewQualities = [
   { value: 0, label: 'Again', color: 'from-red-500 to-rose-600', description: 'I forgot it' },
@@ -66,70 +69,82 @@ export default function VocabularyReview() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 flex items-center justify-center">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full"
-        />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50">
+        <Head>
+          <title>Vocabulary Review - Lingua Journey</title>
+        </Head>
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full"
+          />
+        </div>
       </div>
     );
   }
 
   if (!reviewing || cards.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 flex items-center justify-center py-16 px-4">
-        <motion.div 
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="max-w-2xl w-full text-center"
-        >
-          <div className="text-9xl mb-8">🎉</div>
-          <h1 className="text-5xl font-black text-gray-900 mb-6">Review Complete!</h1>
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border border-white/50 mb-8">
-            <div className="grid grid-cols-2 gap-8">
-              <div>
-                <div className="text-6xl font-black text-indigo-600 mb-3">{cards.length}</div>
-                <div className="text-xl text-gray-600">Cards Reviewed</div>
-              </div>
-              <div>
-                <div className="text-6xl font-black text-green-600 mb-3">{correctCount}</div>
-                <div className="text-xl text-gray-600">Correct Answers</div>
-              </div>
-            </div>
-            {cards.length > 0 && (
-              <div className="mt-8 pt-8 border-t border-gray-200">
-                <div className="text-3xl font-bold text-gray-900 mb-2">
-                  {Math.round((correctCount / cards.length) * 100)}% Success Rate
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50">
+        <Head>
+          <title>Vocabulary Review - Lingua Journey</title>
+        </Head>
+        <Navbar />
+        <div className="flex items-center justify-center py-16 px-4 min-h-[calc(100vh-80px)]">
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="max-w-2xl w-full text-center"
+          >
+            <div className="text-9xl mb-8">🎉</div>
+            <h1 className="text-5xl font-black text-gray-900 mb-6">Review Complete!</h1>
+            <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border border-white/50 mb-8">
+              <div className="grid grid-cols-2 gap-8">
+                <div>
+                  <div className="text-6xl font-black text-indigo-600 mb-3">{cards.length}</div>
+                  <div className="text-xl text-gray-600">Cards Reviewed</div>
                 </div>
-                <div className="text-lg text-gray-600">Excellent work!</div>
+                <div>
+                  <div className="text-6xl font-black text-green-600 mb-3">{correctCount}</div>
+                  <div className="text-xl text-gray-600">Correct Answers</div>
+                </div>
               </div>
-            )}
-          </div>
-          <div className="flex gap-4 justify-center">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => router.push('/vocabulary')}
-              className="px-8 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold text-lg hover:bg-gray-200 transition-all shadow-lg"
-            >
-              ← Back to Cards
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                fetchDueCards();
-                setCurrentIndex(0);
-                setCorrectCount(0);
-                setIsFlipped(false);
-              }}
-              className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl font-bold text-lg hover:from-indigo-600 hover:to-purple-700 transition-all shadow-lg"
-            >
-              Review Again
-            </motion.button>
-          </div>
-        </motion.div>
+              {cards.length > 0 && (
+                <div className="mt-8 pt-8 border-t border-gray-200">
+                  <div className="text-3xl font-bold text-gray-900 mb-2">
+                    {Math.round((correctCount / cards.length) * 100)}% Success Rate
+                  </div>
+                  <div className="text-lg text-gray-600">Excellent work!</div>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-4 justify-center">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => router.push('/vocabulary')}
+                    className="px-8 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold text-lg hover:bg-gray-200 transition-all shadow-lg flex items-center gap-2"
+                  >
+                    <ArrowIcon direction="left" color="gray" /> Back to Cards
+                  </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  fetchDueCards();
+                  setCurrentIndex(0);
+                  setCorrectCount(0);
+                  setIsFlipped(false);
+                }}
+                className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl font-bold text-lg hover:from-indigo-600 hover:to-purple-700 transition-all shadow-lg"
+              >
+                Review Again
+              </motion.button>
+            </div>
+          </motion.div>
+        </div>
       </div>
     );
   }
@@ -138,34 +153,33 @@ export default function VocabularyReview() {
   const progress = ((currentIndex + 1) / cards.length) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-black text-gray-900">🎯 Review Session</h1>
-              <p className="text-lg text-gray-600">Card {currentIndex + 1} of {cards.length}</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50">
+      <Head>
+        <title>Vocabulary Review - Lingua Journey</title>
+      </Head>
+      <Navbar />
+      <div className="py-12 px-4">
+        <div className="max-w-4xl mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-3xl font-black text-gray-900">🎯 Review Session</h1>
+                <p className="text-lg text-gray-600">Card {currentIndex + 1} of {cards.length}</p>
+              </div>
             </div>
-            <button
-              onClick={() => router.push('/vocabulary')}
-              className="px-6 py-3 bg-white/80 backdrop-blur-sm rounded-2xl font-semibold text-gray-700 shadow-lg border border-gray-200 hover:bg-white transition-all"
-            >
-              ← Exit
-            </button>
-          </div>
-          <div className="w-full h-4 bg-white/50 rounded-full overflow-hidden shadow-inner">
-            <motion.div 
-              className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.5 }}
-            />
-          </div>
-        </motion.div>
+            <div className="w-full h-4 bg-white/50 rounded-full overflow-hidden shadow-inner">
+              <motion.div 
+                className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.5 }}
+              />
+            </div>
+          </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -246,6 +260,7 @@ export default function VocabularyReview() {
               <div className="text-3xl font-black text-purple-600">{currentCard.ease_factor.toFixed(2)}</div>
               <div className="text-sm text-gray-600">Ease Factor</div>
             </div>
+          </div>
           </div>
         </div>
       </div>

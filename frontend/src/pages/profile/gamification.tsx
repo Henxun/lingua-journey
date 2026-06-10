@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import { motion } from 'framer-motion';
+import { Navbar } from '../../components/Navbar';
 import { gamificationAPI, GamificationProfile, Achievement, DailyQuest, LeaderboardEntry, CheckInResult } from '../../lib/api';
 
 function LevelProgressBar({ profile }: { profile: GamificationProfile }) {
@@ -248,6 +250,10 @@ export default function GamificationPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <Head>
+        <title>Game Center - Lingua Journey</title>
+      </Head>
+      <Navbar />
       <div className="max-w-6xl mx-auto px-4 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

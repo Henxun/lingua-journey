@@ -32,7 +32,7 @@ export class Assessment {
 
   @Column({
     type: 'simple-array',
-    default: ['listening', 'reading', 'speaking', 'writing']
+    default: 'listening,reading,speaking,writting'
   })
   skills: SkillType[];
 
@@ -42,7 +42,7 @@ export class Assessment {
   @Column({ type: 'float', default: 70 })
   passingScore: number;
 
-  @Column({ type: 'json' })
+  @Column({ type: 'simple-json' })
   questions: Question[];
 
   @Column({ default: true })

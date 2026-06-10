@@ -1,0 +1,413 @@
+{
+  "common": {
+    "appName": "Lingua Journey",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "clear": "Clear",
+    "yes": "Yes",
+    "no": "No",
+    "or": "or"
+  },
+  "nav": {
+    "home": "Home",
+    "courses": "Courses",
+    "vocabulary": "Vocabulary",
+    "progress": "Progress",
+    "aiTeacher": "AI Teacher",
+    "assessment": "Assessment",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register"
+  },
+  "home": {
+    "hero": {
+      "titleLine1": "Learn Languages",
+      "titleLine2": "In Real-World Scenarios",
+      "description": "Practice with AI-simulated conversations, immerse yourself in multilingual scenarios. From everyday dialogue to business settings, make language learning engaging and rapidly improve your skills.",
+      "title": "Master Any Language with AI-Powered Learning",
+      "subtitle": "Personalized lessons, intelligent feedback, and adaptive practice to help you achieve fluency faster",
+      "startLearning": "Start Learning",
+      "learnMore": "Learn More"
+    },
+    "features": {
+      "title": "Why Choose Lingua Journey?",
+      "aiDialog": {
+        "title": "AI Conversation Practice",
+        "description": "Realistic scenario simulation with intelligent correction feedback"
+      },
+      "aiTeacher": {
+        "title": "AI Teacher Instruction",
+        "description": "Personalized course recommendations with knowledge explanations"
+      },
+      "scene3d": {
+        "title": "3D Scene Interaction",
+        "description": "Immersive 3D scenarios with interactive learning experience"
+      },
+      "aiTutor": {
+        "title": "AI-Powered Tutor",
+        "description": "Get 24/7 personalized guidance from our AI language teacher"
+      },
+      "adaptiveLearning": {
+        "title": "Adaptive Learning",
+        "description": "Content that adjusts to your skill level and learning pace"
+      },
+      "comprehensive": {
+        "title": "Comprehensive Assessment",
+        "description": "Track your progress with CEFR-aligned assessments"
+      }
+    },
+    "languages": {
+      "title": "Multi-Language Support",
+      "subtitle": "From mainstream global languages to rare ones, meeting all your learning needs"
+    },
+    "footer": {
+      "features": "Features",
+      "aiDialog": "AI Conversation",
+      "aiTeacher": "AI Teacher",
+      "assessment": "Language Assessment",
+      "vocabulary": "Vocabulary",
+      "supportedLanguages": "Supported Languages",
+      "english": "English",
+      "chinese": "Chinese",
+      "japanese": "Japanese",
+      "korean": "Korean",
+      "contactUs": "Contact Us",
+      "aboutUs": "About Us",
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service"
+    },
+    "cta": {
+      "title": "Ready to Start Your Language Journey?",
+      "button": "Get Started Free"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Welcome back! Continue your language learning journey",
+      "signin": "Sign in",
+      "signingIn": "Signing in...",
+      "sendCode": "Send Verification Code",
+      "resendIn": "Resend in {{seconds}}s",
+      "sending": "Sending...",
+      "verifySignin": "Verify & Sign in",
+      "verifying": "Verifying...",
+      "verificationCode": "Verification Code",
+      "email": "Email",
+      "password": "Password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "submit": "Login",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "orContinueWith": "Or continue with"
+    },
+    "register": {
+      "title": "Create Account",
+      "username": "Username",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "nativeLanguage": "Native Language",
+      "targetLanguage": "Target Language",
+      "submit": "Create Account",
+      "hasAccount": "Already have an account?",
+      "login": "Login",
+      "orContinueWith": "Or continue with"
+    },
+    "forgotPassword": {
+      "title": "Reset Password",
+      "email": "Email",
+      "submit": "Send Reset Code",
+      "rememberPassword": "Remember your password?",
+      "login": "Login"
+    },
+    "resetPassword": {
+      "title": "Set New Password",
+      "code": "Verification Code",
+      "password": "New Password",
+      "confirmPassword": "Confirm new password",
+      "submit": "Reset Password"
+    },
+    "oauth": {
+      "google": "Continue with Google",
+      "github": "Continue with GitHub"
+    }
+  },
+  "courses": {
+    "pageTitle": "Courses - Lingua Journey",
+    "browse": "Browse Courses",
+    "title": "Language Courses",
+    "subtitle": "Find the perfect course for your language learning journey",
+    "filter": {
+      "language": "Language",
+      "difficulty": "Difficulty",
+      "all": "All",
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "empty": {
+      "title": "No courses found",
+      "description": "Try adjusting your filters"
+    },
+    "startLearning": "Start Learning",
+    "card": {
+      "lessons": "{{count}} lessons",
+      "startCourse": "Start Course",
+      "continueCourse": "Continue",
+      "completed": "Completed"
+    },
+    "detail": {
+      "about": "About this course",
+      "curriculum": "Curriculum",
+      "lesson": "Lesson",
+      "progress": "Progress",
+      "completeLesson": "Mark as Complete",
+      "previousLesson": "Previous Lesson",
+      "nextLesson": "Next Lesson"
+    }
+  },
+  "vocabulary": {
+    "pageTitle": "Vocabulary - Lingua Journey",
+    "flashcards": "Flashcards",
+    "title": "Vocabulary",
+    "subtitle": "Smart flashcards to help you memorize words",
+    "reviewBanner": {
+      "title": "Review Reminder",
+      "cardsReady": "cards ready to review",
+      "dueNow": "Due now",
+      "startReview": "Start Review"
+    },
+    "decks": "My Decks",
+    "decksEmpty": "No decks yet",
+    "cards": "{{count}} cards",
+    "progress": "Progress",
+    "allCards": "All Cards",
+    "addCard": "Add Card",
+    "noCards": {
+      "title": "No cards yet",
+      "subtitle": "Add your first card to start learning",
+      "createFirst": "Create First Card"
+    },
+    "reviewedCount": "Reviewed: {{count}}",
+    "correctCount": "Correct: {{count}}%",
+    "addCardModal": {
+      "title": "Add New Card",
+      "front": "Front (Word)",
+      "back": "Back (Definition)",
+      "example": "Example",
+      "save": "Save Card"
+    },
+    "createDeckModal": {
+      "title": "Create New Deck",
+      "name": "Deck Name",
+      "description": "Description",
+      "create": "Create Deck"
+    },
+    "confirmDelete": {
+      "title": "Delete Card",
+      "message": "Are you sure you want to delete this card?"
+    },
+    "review": "Review",
+    "createDeck": "Create Deck",
+    "front": "Front",
+    "back": "Back",
+    "example": "Example",
+    "reviewComplete": {
+      "title": "Review Complete!",
+      "score": "You scored {{score}}%",
+      "cardsReviewed": "Cards reviewed: {{count}}",
+      "continue": "Continue"
+    }
+  },
+  "aiTeacher": {
+    "pageTitle": "AI Teacher - Lingua Journey",
+    "title": "AI Language Teacher",
+    "subtitle": "Your personal language tutor available 24/7",
+    "sessions": "Sessions",
+    "topicPlaceholder": "What would you like to learn about?",
+    "messages": "{{count}} messages",
+    "you": "You",
+    "aiTeacher": "AI Teacher",
+    "inputPlaceholder": "Type your message...",
+    "sending": "Sending...",
+    "send": "Send",
+    "startLearning": "Start Learning with AI",
+    "startLearningDescription": "Your AI teacher is ready to help you practice and improve",
+    "newSession": "New Session",
+    "topic": "Topic",
+    "startChat": "Start Chat",
+    "typeMessage": "Type your message...",
+    "suggestions": {
+      "grammar": "Explain Grammar",
+      "vocabulary": "Explain Vocabulary",
+      "correction": "Get Correction",
+      "practice": "Practice Conversation"
+    },
+    "features": {
+      "grammar": "Grammar Explanation",
+      "vocabulary": "Vocabulary Builder",
+      "correction": "Text Correction",
+      "conversation": "Conversation Practice"
+    }
+  },
+  "assessment": {
+    "pageTitle": "Assessment - Lingua Journey",
+    "title": "Language Assessment",
+    "subtitle": "Test your language proficiency",
+    "loading": "Loading assessments...",
+    "noAssessments": "No assessments available",
+    "checkBackLater": "Check back later for new assessments",
+    "skills": "Skills",
+    "min": "min",
+    "questions": "questions",
+    "toPass": "to pass",
+    "start": "Start Assessment",
+    "complete": "Complete!",
+    "recommendations": "Recommendations",
+    "backToAssessments": "Back to Assessments",
+    "questionOf": "Question {{current}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next",
+    "submitting": "Submitting...",
+    "submitAssessment": "Submit Assessment",
+    "typeAnswer": "Type your answer here...",
+    "writeAnswer": "Write your answer",
+    "question": "Question {{current}} of {{total}}",
+    "submitAnswer": "Submit Answer",
+    "nextQuestion": "Next Question",
+    "complete": {
+      "title": "Assessment Complete!",
+      "score": "Your Score",
+      "level": "Recommended Level",
+      "feedback": "Feedback",
+      "recommendations": "Recommendations",
+      "retry": "Try Again",
+      "backToAssessments": "Back to Assessments"
+    }
+  },
+  "progress": {
+    "pageTitle": "Progress - Lingua Journey",
+    "loading": "Loading your progress...",
+    "title": "Learning Progress",
+    "subtitle": "Track your language learning journey",
+    "stats": {
+      "averageScore": "Average Score",
+      "assessmentsCompleted": "Assessments Completed",
+      "bestSkill": "Best Skill",
+      "needsImprovement": "Needs Improvement"
+    },
+    "skillBreakdown": {
+      "title": "Skill Breakdown",
+      "level": "Level",
+      "lastAssessed": "Last assessed"
+    },
+    "weeklyProgress": {
+      "title": "Weekly Progress"
+    },
+    "recommendations": {
+      "title": "Recommendations"
+    },
+    "actions": {
+      "takeAssessment": "Take Assessment",
+      "chatWithAi": "Chat with AI"
+    },
+    "charts": {
+      "weeklyProgress": "Weekly Progress",
+      "skillRadar": "Skill Breakdown"
+    },
+    "insights": {
+      "title": "Learning Insights",
+      "noData": "Complete more assessments to see insights"
+    }
+  },
+  "profile": {
+    "pageTitle": "Profile - Lingua Journey",
+    "title": "My Profile",
+    "stats": "Learning Statistics",
+    "achievements": "Achievements",
+    "settings": "Settings",
+    "learningPath": "Learning Path",
+    "streak": {
+      "title": "Current Streak",
+      "days": "{{count}} days"
+    },
+    "editProfile": "Edit Profile",
+    "nativeLanguage": "Native Language",
+    "targetLanguage": "Target Language",
+    "myCourses": "My Courses",
+    "complete": "{{count}}% complete",
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "emailStatus": "Email Status",
+    "verified": "Verified",
+    "notVerified": "Not Verified",
+    "linkedAccounts": "Linked Accounts",
+    "unlink": "Unlink",
+    "viewStats": "View Statistics",
+    "gameCenter": "Game Center",
+    "vocabulary": "Vocabulary",
+    "logout": "Logout",
+    "changePassword": "Change Password",
+    "setupPassword": "Set Up Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "username": "Username",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "loadError": "Failed to load profile",
+    "updateError": "Failed to update profile",
+    "updateSuccess": "Profile updated successfully",
+    "passwordChangeSuccess": "Password changed successfully"
+  },
+  "languages": {
+    "en": "English",
+    "zh": "Chinese",
+    "es": "Spanish",
+    "fr": "French",
+    "de": "German",
+    "ja": "Japanese",
+    "ko": "Korean"
+  },
+  "levels": {
+    "A1": "Beginner",
+    "A2": "Elementary",
+    "B1": "Intermediate",
+    "B2": "Upper Intermediate",
+    "C1": "Advanced",
+    "C2": "Proficient"
+  },
+  "skills": {
+    "listening": "Listening",
+    "reading": "Reading",
+    "speaking": "Speaking",
+    "writing": "Writing"
+  },
+  "footer": {
+    "description": "Your AI-powered language learning companion",
+    "quickLinks": "Quick Links",
+    "resources": "Resources",
+    "support": "Support",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "contact": "Contact Us"
+  }
+}

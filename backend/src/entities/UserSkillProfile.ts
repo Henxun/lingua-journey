@@ -37,7 +37,7 @@ export class UserSkillProfile {
   })
   trend: SkillTrend;
 
-  @Column({ type: 'json', default: () => "'[]'" })
+  @Column({ type: 'simple-json', default: '[]' })
   historicalScores: { date: Date; score: number }[];
 
   @CreateDateColumn()

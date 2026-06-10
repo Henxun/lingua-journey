@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
-import { CEFRLevel, SkillType, Question } from './Assessment';
+import { CEFRLevel } from './Assessment';
 
 export interface Answer {
   questionId: string;
@@ -30,10 +30,10 @@ export class AssessmentResult {
   @Column({ type: 'float' })
   score: number;
 
-  @Column({ type: 'json' })
+  @Column({ type: 'simple-json' })
   skillScores: SkillScores;
 
-  @Column({ type: 'json' })
+  @Column({ type: 'simple-json' })
   answers: Answer[];
 
   @Column({
@@ -46,7 +46,7 @@ export class AssessmentResult {
   @Column({ type: 'text', nullable: true })
   feedback?: string;
 
-  @Column({ type: 'json', nullable: true })
+  @Column({ type: 'simple-json', nullable: true })
   recommendations?: string[];
 
   @Column({ type: 'datetime', nullable: true })

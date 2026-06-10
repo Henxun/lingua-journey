@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import { useAuth } from '../../../../contexts/AuthContext';
 import { courseAPI } from '../../../../lib/api';
+import { Navbar } from '../../../../components/Navbar';
+import { ArrowIcon } from '../../../../components/ArrowIcon';
 
 type Lesson = {
   id: string;
@@ -91,41 +94,39 @@ export default function LessonPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        <Navbar />
+        <div className="flex items-center justify-center pt-32">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
       </div>
     );
   }
 
   if (!lesson || !course) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Lesson not found</h1>
-          <button
-            onClick={() => router.push(`/courses/${courseId}`)}
-            className="text-blue-600 hover:text-blue-700 font-medium"
-          >
-            ← Back to course
-          </button>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        <Navbar />
+        <div className="flex items-center justify-center pt-32">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Lesson not found</h1>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <Head>
+        <title>{lesson.title} - {course.name} - Lingua Journey</title>
+      </Head>
+      <Navbar />
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
             <div className="flex items-center justify-between">
               <div>
-                <button
-                  onClick={() => router.push(`/courses/${courseId}`)}
-                  className="text-white/80 hover:text-white mb-4 inline-flex items-center"
-                >
-                  ← Back to course
-                </button>
                 <h1 className="text-2xl font-bold text-white">{lesson.title}</h1>
                 {lesson.description && (
                   <p className="text-blue-100 mt-2">{lesson.description}</p>
@@ -168,9 +169,9 @@ export default function LessonPage() {
                 {hasPrevious && (
                   <button
                     onClick={() => router.push(`/courses/${courseId}/lessons/${sortedLessons[currentIndex - 1].id}`)}
-                    className="text-gray-600 hover:text-gray-900 font-medium"
+                    className="text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2"
                   >
-                    ← Previous Lesson
+                    <ArrowIcon direction="left" color="gray" size="sm" /> Previous Lesson
                   </button>
                 )}
               </div>
@@ -193,9 +194,9 @@ export default function LessonPage() {
                 {hasNext && (
                   <button
                     onClick={() => router.push(`/courses/${courseId}/lessons/${sortedLessons[currentIndex + 1].id}`)}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-colors"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-colors flex items-center gap-2"
                   >
-                    Next Lesson →
+                    Next Lesson <ArrowIcon direction="right" color="white" size="sm" />
                   </button>
                 )}
               </div>

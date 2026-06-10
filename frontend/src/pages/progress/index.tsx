@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { progressAPI, LearningInsights, UserSkillProfile } from '../../lib/api';
 import { assessmentAPI } from '../../lib/api';
+import { Navbar } from '../../components/Navbar';
 
 export default function ProgressPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [insights, setInsights] = useState<LearningInsights | null>(null);
   const [skills, setSkills] = useState<UserSkillProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,34 +58,33 @@ export default function ProgressPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-6xl mb-4">⏳</div>
-          <p className="text-xl text-gray-600">Loading your progress...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <Navbar />
+        <div className="flex items-center justify-center pt-32">
+          <div className="text-center">
+            <div className="text-6xl mb-4">⏳</div>
+            <p className="text-xl text-gray-600">{t('progress.loading')}</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <Head>
+        <title>{t('progress.pageTitle')}</title>
+      </Head>
+      <Navbar />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">📊 Learning Progress</h1>
-              <p className="text-xl text-gray-600">Track your language learning journey</p>
-            </div>
-            <button
-              onClick={() => router.push('/')}
-              className="px-6 py-3 bg-white rounded-xl shadow-lg text-gray-700 font-medium hover:bg-gray-50"
-            >
-              ← Back Home
-            </button>
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('progress.title')}</h1>
+            <p className="text-xl text-gray-600">{t('progress.subtitle')}</p>
           </div>
         </motion.div>
 
@@ -94,7 +97,7 @@ export default function ProgressPage() {
               className="bg-white rounded-2xl shadow-xl p-6"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-600">Average Score</span>
+                <span className="text-gray-600">{t('progress.stats.averageScore')}</span>
                 <span className="text-2xl">📊</span>
               </div>
               <div className="text-4xl font-bold text-gray-900">{insights.averageScore}%</div>
@@ -113,7 +116,7 @@ export default function ProgressPage() {
               className="bg-white rounded-2xl shadow-xl p-6"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-600">Assessments Completed</span>
+                <span className="text-gray-600">{t('progress.stats.assessmentsCompleted')}</span>
                 <span className="text-2xl">✅</span>
               </div>
               <div className="text-4xl font-bold text-gray-900">{insights.totalAssessments}</div>
@@ -126,12 +129,12 @@ export default function ProgressPage() {
               className="bg-white rounded-2xl shadow-xl p-6"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-600">Best Skill</span>
+                <span className="text-gray-600">{t('progress.stats.bestSkill')}</span>
                 <span className="text-2xl">🏆</span>
               </div>
               <div className="text-2xl font-bold text-gray-900 capitalize">{insights.bestSkill}</div>
               <div className="text-sm text-gray-500 mt-1">
-                Needs improvement: <span className="capitalize">{insights.needsImprovement}</span>
+                {t('progress.stats.needsImprovement')}: <span className="capitalize">{insights.needsImprovement}</span>
               </div>
             </motion.div>
           </div>
@@ -144,7 +147,7 @@ export default function ProgressPage() {
             transition={{ delay: 0.4 }}
             className="bg-white rounded-2xl shadow-xl p-6 mb-8"
           >
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">📈 Skill Breakdown</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('progress.skillBreakdown.title')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {skills.map((skill) => (
                 <div key={skill.id} className="p-4 bg-gray-50 rounded-xl">
@@ -164,7 +167,7 @@ export default function ProgressPage() {
                   </div>
                   <div className="mb-2">
                     <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
-                      <span>Level: <span className="font-semibold">{skill.level}</span></span>
+                      <span>{t('progress.skillBreakdown.level')}: <span className="font-semibold">{skill.level}</span></span>
                       <span className="font-semibold">{skill.score}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-3">
@@ -182,7 +185,7 @@ export default function ProgressPage() {
                   </div>
                   {skill.lastAssessed && (
                     <div className="text-xs text-gray-500 mt-2">
-                      Last assessed: {new Date(skill.lastAssessed).toLocaleDateString()}
+                      {t('progress.skillBreakdown.lastAssessed')}: {new Date(skill.lastAssessed).toLocaleDateString()}
                     </div>
                   )}
                 </div>
@@ -198,7 +201,7 @@ export default function ProgressPage() {
             transition={{ delay: 0.5 }}
             className="bg-white rounded-2xl shadow-xl p-6 mb-8"
           >
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">📅 Weekly Progress</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('progress.weeklyProgress.title')}</h2>
             <div className="flex items-end justify-between h-64 space-x-2">
               {insights.weeklyProgress.map((day, index) => (
                 <div key={index} className="flex-1 flex flex-col items-center">
@@ -220,7 +223,7 @@ export default function ProgressPage() {
             transition={{ delay: 0.6 }}
             className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-xl p-6"
           >
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">💡 Personalized Recommendations</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('progress.recommendations.title')}</h2>
             <ul className="space-y-3">
               {insights.recommendations.map((rec, index) => (
                 <li key={index} className="flex items-start">
@@ -242,13 +245,13 @@ export default function ProgressPage() {
             onClick={() => router.push('/assessment')}
             className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
           >
-            Take Assessment
+            {t('progress.actions.takeAssessment')}
           </button>
           <button
             onClick={() => router.push('/ai-teacher')}
             className="flex-1 px-6 py-4 bg-white text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all shadow-lg"
           >
-            Chat with AI Teacher
+            {t('progress.actions.chatWithAi')}
           </button>
         </motion.div>
       </div>

@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { authAPI } from '../lib/api';
 
 export default function Register() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -112,8 +114,8 @@ export default function Register() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden">
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-10 text-center">
-          <h1 className="text-3xl font-bold text-white mb-2">Lingua Journey</h1>
-          <p className="text-blue-100">Start your language learning journey today</p>
+          <h1 className="text-3xl font-bold text-white mb-2">{t('auth.register.brand')}</h1>
+          <p className="text-blue-100">{t('auth.register.subtitle')}</p>
         </div>
         
         <div className="px-8 py-8">
@@ -135,7 +137,7 @@ export default function Register() {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
-              <span className="font-medium text-gray-700">Continue with Google</span>
+              <span className="font-medium text-gray-700">{t('auth.oauth.google')}</span>
             </button>
 
             <button
@@ -146,7 +148,7 @@ export default function Register() {
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23a11.509 11.509 0 0 1 6.008 0c2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.577 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
               </svg>
-              <span className="font-medium">Continue with GitHub</span>
+              <span className="font-medium">{t('auth.oauth.github')}</span>
             </button>
           </div>
 
@@ -155,7 +157,7 @@ export default function Register() {
               <div className="w-full border-t border-gray-200"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500">or</span>
+              <span className="px-4 bg-white text-gray-500">{t('auth.register.or')}</span>
             </div>
           </div>
 
@@ -168,7 +170,7 @@ export default function Register() {
                   : 'border-gray-200 text-gray-600 hover:border-gray-300'
               }`}
             >
-              Password
+              {t('auth.register.password_method')}
             </button>
             <button
               onClick={() => setUseCode(true)}
@@ -178,48 +180,48 @@ export default function Register() {
                   : 'border-gray-200 text-gray-600 hover:border-gray-300'
               }`}
             >
-              Verification Code
+              {t('auth.register.verification_code_method')}
             </button>
           </div>
 
           {!useCode ? (
             <form onSubmit={handlePasswordRegister} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('auth.register.email')}</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="you@example.com"
+                  placeholder={t('auth.register.email_placeholder')}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('auth.register.username')}</label>
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="your_username"
+                  placeholder={t('auth.register.username_placeholder')}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('auth.register.password')}</label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="••••••••"
+                  placeholder={t('auth.register.password_placeholder')}
                   required
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Native Language</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('auth.register.native_language')}</label>
                   <select
                     value={nativeLanguage}
                     onChange={(e) => setNativeLanguage(e.target.value)}
@@ -231,7 +233,7 @@ export default function Register() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Target Language</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('auth.register.target_language')}</label>
                   <select
                     value={targetLanguage}
                     onChange={(e) => setTargetLanguage(e.target.value)}
@@ -248,36 +250,36 @@ export default function Register() {
                 disabled={loading}
                 className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-colors disabled:opacity-50"
               >
-                {loading ? 'Creating account...' : 'Create Account'}
+                {loading ? t('auth.register.creating') : t('auth.register.submit')}
               </button>
             </form>
           ) : (
             <form onSubmit={handleVerifyCode} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('auth.register.email')}</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="you@example.com"
+                  placeholder={t('auth.register.email_placeholder')}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('auth.register.username')}</label>
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="your_username"
+                  placeholder={t('auth.register.username_placeholder')}
                   required
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Native Language</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('auth.register.native_language')}</label>
                   <select
                     value={nativeLanguage}
                     onChange={(e) => setNativeLanguage(e.target.value)}
@@ -289,7 +291,7 @@ export default function Register() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Target Language</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('auth.register.target_language')}</label>
                   <select
                     value={targetLanguage}
                     onChange={(e) => setTargetLanguage(e.target.value)}
@@ -309,18 +311,18 @@ export default function Register() {
                   disabled={loading || countdown > 0 || !email || !username}
                   className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-colors disabled:opacity-50"
                 >
-                  {countdown > 0 ? `Resend in ${countdown}s` : loading ? 'Sending...' : 'Send Verification Code'}
+                  {countdown > 0 ? t('auth.register.resend_in', { countdown }) : loading ? t('auth.register.sending') : t('auth.register.send_code')}
                 </button>
               ) : (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Verification Code</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('auth.register.verification_code')}</label>
                     <input
                       type="text"
                       value={code}
                       onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-2xl tracking-widest"
-                      placeholder="000000"
+                      placeholder={t('auth.register.verification_code_placeholder')}
                       maxLength={6}
                       required
                     />
@@ -330,7 +332,7 @@ export default function Register() {
                     disabled={loading || code.length < 6}
                     className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transition-colors disabled:opacity-50"
                   >
-                    {loading ? 'Verifying...' : 'Verify & Create Account'}
+                    {loading ? t('auth.register.verifying') : t('auth.register.verify_and_create')}
                   </button>
                 </>
               )}
@@ -339,9 +341,9 @@ export default function Register() {
 
           <div className="mt-8 text-center">
             <p className="text-gray-600">
-              Already have an account?{' '}
+              {t('auth.register.already_have_account')}{' '}
               <Link href="/login" className="text-blue-600 font-medium hover:text-blue-700">
-                Sign in
+                {t('auth.register.sign_in')}
               </Link>
             </p>
           </div>

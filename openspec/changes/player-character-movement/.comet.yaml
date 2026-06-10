@@ -1,0 +1,17 @@
+workflow: full
+phase: verify
+build_mode: subagent-driven-development
+build_pause: null
+isolation: branch
+verify_mode: full
+base_ref: f1600b5f30e147e6366009e1ea052cc291436e84
+design_doc: docs/superpowers/specs/2026-06-09-player-character-movement-design.md
+plan: docs/superpowers/plans/2026-06-09-player-character-movement.md
+verify_result: pending
+verification_report: null
+branch_status: pending
+created_at: 2026-06-09
+verified_at: null
+archived: false
+handoff_context: openspec/changes/player-character-movement/.comet/handoff/design-context.json
+handoff_hash: fede0326eb61c84aecf43dd63d58ced9744418754574bf91267ae7f7210a35bd

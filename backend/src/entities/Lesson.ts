@@ -41,6 +41,6 @@ export class Lesson {
   @JoinColumn({ name: 'scene_id' })
   scene: Scene;
 
-  @Column({ type: 'json', nullable: true })
+  @Column({ type: 'simple-json', nullable: true })
   conversation_config: any;
 }

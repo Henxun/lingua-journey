@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { assessmentAPI, Assessment, Question, Answer, AssessmentResult } from '../../lib/api';
+import { Navbar } from '../../components/Navbar';
 
 export default function AssessmentPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [currentAssessment, setCurrentAssessment] = useState<Assessment | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -76,8 +80,12 @@ export default function AssessmentPage() {
 
   if (result) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4">
-        <div className="max-w-4xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <Head>
+          <title>Assessment Result - Lingua Journey</title>
+        </Head>
+        <Navbar />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -85,7 +93,7 @@ export default function AssessmentPage() {
           >
             <div className="text-center mb-8">
               <div className="text-6xl mb-4">🎉</div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">Assessment Complete!</h1>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('assessment.complete')}</h1>
               <div className="text-6xl font-bold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-indigo-600">
                 {result.score}%
               </div>
@@ -99,7 +107,7 @@ export default function AssessmentPage() {
 
             {result.recommendations && result.recommendations.length > 0 && (
               <div className="bg-indigo-50 p-4 rounded mb-6">
-                <h3 className="font-bold text-gray-900 mb-2">Recommendations:</h3>
+                <h3 className="font-bold text-gray-900 mb-2">{t('assessment.recommendations')}</h3>
                 <ul className="list-disc list-inside space-y-1">
                   {result.recommendations.map((rec, idx) => (
                     <li key={idx} className="text-gray-700">{rec}</li>
@@ -115,7 +123,7 @@ export default function AssessmentPage() {
               }}
               className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
             >
-              Back to Assessments
+              {t('assessment.backToAssessments')}
             </button>
           </motion.div>
         </div>
@@ -125,21 +133,15 @@ export default function AssessmentPage() {
 
   if (currentAssessment && currentQuestion) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4">
-        <div className="max-w-4xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <Head>
+          <title>Assessment - Lingua Journey</title>
+        </Head>
+        <Navbar />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
               <h1 className="text-2xl font-bold text-gray-900">{currentAssessment.name}</h1>
-              <button
-                onClick={() => {
-                  setCurrentAssessment(null);
-                  setCurrentQuestionIndex(0);
-                  setAnswers({});
-                }}
-                className="px-4 py-2 text-gray-600 hover:text-gray-900"
-              >
-                Cancel
-              </button>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
@@ -148,7 +150,7 @@ export default function AssessmentPage() {
               />
             </div>
             <p className="text-sm text-gray-600 mt-2">
-              Question {currentQuestionIndex + 1} of {currentAssessment.questions.length}
+              {t('assessment.questionOf', { current: currentQuestionIndex + 1, total: currentAssessment.questions.length })}
             </p>
           </div>
 
@@ -189,7 +191,7 @@ export default function AssessmentPage() {
                 value={answers[currentQuestion.id] || ''}
                 onChange={(e) => submitAnswer(currentQuestion.id, e.target.value)}
                 className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none"
-                placeholder="Type your answer..."
+                placeholder={t('assessment.typeAnswer')}
               />
             )}
 
@@ -198,7 +200,7 @@ export default function AssessmentPage() {
                 value={answers[currentQuestion.id] || ''}
                 onChange={(e) => submitAnswer(currentQuestion.id, e.target.value)}
                 className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none h-48"
-                placeholder="Write your answer..."
+                placeholder={t('assessment.writeAnswer')}
               />
             )}
           </motion.div>
@@ -209,7 +211,7 @@ export default function AssessmentPage() {
               disabled={currentQuestionIndex === 0}
               className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-medium disabled:opacity-50 hover:bg-gray-300 transition-all"
             >
-              Previous
+              {t('assessment.previous')}
             </button>
             
             {isLastQuestion ? (
@@ -218,14 +220,14 @@ export default function AssessmentPage() {
                 disabled={submitting || Object.keys(answers).length < currentAssessment.questions.length}
                 className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-medium disabled:opacity-50 hover:shadow-lg transition-all"
               >
-                {submitting ? 'Submitting...' : 'Submit Assessment'}
+                {submitting ? t('assessment.submitting') : t('assessment.submitAssessment')}
               </button>
             ) : (
               <button
                 onClick={nextQuestion}
                 className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
               >
-                Next
+                {t('assessment.next')}
               </button>
             )}
           </div>
@@ -235,37 +237,33 @@ export default function AssessmentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <Head>
+        <title>Assessments - Lingua Journey</title>
+      </Head>
+      <Navbar />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">📝 Language Assessment</h1>
-              <p className="text-xl text-gray-600">Test your language proficiency</p>
-            </div>
-            <button
-              onClick={() => router.push('/')}
-              className="px-6 py-3 bg-white rounded-xl shadow-lg text-gray-700 font-medium hover:bg-gray-50"
-            >
-              ← Back Home
-            </button>
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('assessment.title')}</h1>
+            <p className="text-xl text-gray-600">{t('assessment.subtitle')}</p>
           </div>
         </motion.div>
 
         {loading ? (
           <div className="text-center py-12">
             <div className="text-4xl mb-4">⏳</div>
-            <p className="text-gray-600">Loading assessments...</p>
+            <p className="text-gray-600">{t('assessment.loading')}</p>
           </div>
         ) : assessments.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-2xl shadow-xl">
             <div className="text-6xl mb-4">📚</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">No Assessments Available</h2>
-            <p className="text-gray-600">Check back later for new assessments.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('assessment.noAssessments')}</h2>
+            <p className="text-gray-600">{t('assessment.checkBackLater')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -282,19 +280,19 @@ export default function AssessmentPage() {
                   </span>
                   <h2 className="text-xl font-bold text-gray-900 mb-2">{assessment.name}</h2>
                   <p className="text-gray-600 text-sm mb-4">
-                    Skills: {assessment.skills.join(', ')}
+                    {t('assessment.skills')}: {assessment.skills.join(', ')}
                   </p>
                   <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <span>⏱ {assessment.timeLimit} min</span>
-                    <span>📊 {assessment.questions.length} questions</span>
-                    <span>✓ {assessment.passingScore}% to pass</span>
+                    <span>⏱ {assessment.timeLimit} {t('assessment.min')}</span>
+                    <span>📊 {assessment.questions.length} {t('assessment.questions')}</span>
+                    <span>✓ {assessment.passingScore}% {t('assessment.toPass')}</span>
                   </div>
                 </div>
                 <button
                   onClick={() => startAssessment(assessment)}
                   className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
                 >
-                  Start Assessment
+                  {t('assessment.start')}
                 </button>
               </motion.div>
             ))}

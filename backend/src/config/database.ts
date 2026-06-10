@@ -25,13 +25,15 @@ import { Assessment } from '../entities/Assessment';
 import { AssessmentResult } from '../entities/AssessmentResult';
 import { AITeacherSession } from '../entities/AITeacherSession';
 import { UserSkillProfile } from '../entities/UserSkillProfile';
+import { Character } from '../entities/Character';
+import { VoiceSession } from '../entities/VoiceSession';
 
 dotenv.config();
 
 export const AppDataSource = new DataSource({
   type: 'better-sqlite3',
   database: './dev.db',
-  entities: [User, VerificationCode, Conversation, Course, Lesson, CourseProgress, Scene, SceneObject, ConversationSession, ConversationMessage, Achievement, UserAchievement, DailyQuest, UserQuestProgress, LearningGoal, LearningPath, RecommendedCourse, VocabularyCard, VocabularyDeck, ReviewLog, DeckCard, Assessment, AssessmentResult, AITeacherSession, UserSkillProfile],
+  entities: [User, VerificationCode, Conversation, Course, Lesson, CourseProgress, Scene, SceneObject, ConversationSession, ConversationMessage, Achievement, UserAchievement, DailyQuest, UserQuestProgress, LearningGoal, LearningPath, RecommendedCourse, VocabularyCard, VocabularyDeck, ReviewLog, DeckCard, Assessment, AssessmentResult, AITeacherSession, UserSkillProfile, Character, VoiceSession],
   synchronize: true,
   logging: process.env.NODE_ENV === 'development'
 });

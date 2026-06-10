@@ -1,4 +1,5 @@
-import { Answer, Question, SkillScores, CEFRLevel, SkillType } from '../entities/Assessment';
+import { Question, CEFRLevel, SkillType } from '../entities/Assessment';
+import { Answer, SkillScores } from '../entities/AssessmentResult';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 
@@ -142,7 +143,7 @@ export function calculateSkillScores(
 }
 
 export function calculateOverallScore(skillScores: SkillScores): number {
-  const scores = Object.values(skillScores);
+  const scores = Object.values(skillScores) as number[];
   return Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
 }
 

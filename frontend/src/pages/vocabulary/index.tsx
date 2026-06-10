@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
+import { useTranslation } from 'react-i18next';
 import { vocabularyAPI, VocabularyCard, VocabularyDeck, MasteryStats } from '../../lib/api';
 import { motion } from 'framer-motion';
+import { Navbar } from '../../components/Navbar';
 
 const masteryColors = {
   new: { bg: 'from-red-400 to-rose-500', text: 'text-red-600', light: 'bg-red-100', label: 'New' },
@@ -29,6 +32,7 @@ const itemVariants = {
 };
 
 export default function Vocabulary() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [cards, setCards] = useState<VocabularyCard[]>([]);
   const [decks, setDecks] = useState<VocabularyDeck[]>([]);
@@ -93,7 +97,7 @@ export default function Vocabulary() {
   };
 
   const handleDeleteCard = async (cardId: string) => {
-    if (confirm('Are you sure you want to delete this card?')) {
+    if (confirm(t('common.confirmDelete'))) {
       try {
         await vocabularyAPI.deleteCard(cardId);
         fetchData();
@@ -105,29 +109,36 @@ export default function Vocabulary() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 flex items-center justify-center">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full"
-        />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50">
+        <Navbar />
+        <div className="flex items-center justify-center pt-32">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full"
+          />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 py-16 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50">
+      <Head>
+        <title>{t('vocabulary.pageTitle')} - Lingua Journey</title>
+      </Head>
+      <Navbar />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
           <div className="inline-flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full text-sm font-semibold text-purple-700 mb-6 shadow-lg border border-purple-100">
-            📝 Vocabulary Flashcards
+            📝 {t('vocabulary.flashcards')}
           </div>
-          <h1 className="text-5xl font-black text-gray-900 mb-4">Vocabulary Practice</h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">Master new words with spaced repetition and watch your progress grow</p>
+          <h1 className="text-5xl font-black text-gray-900 mb-4">{t('vocabulary.title')}</h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">{t('vocabulary.subtitle')}</p>
         </motion.div>
 
         {dueCards.length > 0 && (
@@ -142,16 +153,16 @@ export default function Vocabulary() {
           >
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold mb-2">🎯 Time to Review!</div>
-                <div className="text-lg opacity-90">You have {dueCards.length} {dueCards.length === 1 ? 'card' : 'cards'} ready for review</div>
+                <div className="text-2xl font-bold mb-2">🎯 {t('vocabulary.reviewBanner.title')}</div>
+                <div className="text-lg opacity-90">{t('vocabulary.reviewBanner.cardsReady', { count: dueCards.length })}</div>
               </div>
               <div className="text-right">
                 <div className="text-6xl font-black">{dueCards.length}</div>
-                <div className="text-sm opacity-75">Due Now</div>
+                <div className="text-sm opacity-75">{t('vocabulary.reviewBanner.dueNow')}</div>
               </div>
             </div>
             <div className="mt-6 bg-white/20 rounded-2xl py-4 px-6 text-center font-semibold">
-              Start Review Session →
+              {t('vocabulary.reviewBanner.startReview')} →
             </div>
           </motion.div>
         )}
@@ -165,7 +176,7 @@ export default function Vocabulary() {
           >
             <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">📚 Decks</h2>
+                <h2 className="text-2xl font-bold text-gray-900">📚 {t('vocabulary.decks')}</h2>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
@@ -179,7 +190,7 @@ export default function Vocabulary() {
                 {decks.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <div className="text-4xl mb-3">📦</div>
-                    <p>No decks yet</p>
+                    <p>{t('vocabulary.decksEmpty')}</p>
                   </div>
                 ) : (
                   decks.map((deck) => (
@@ -197,7 +208,7 @@ export default function Vocabulary() {
                       {deck.description && (
                         <div className="text-sm text-gray-600 mt-1">{deck.description}</div>
                       )}
-                      <div className="text-sm text-gray-500 mt-2">{deck.card_count} cards</div>
+                      <div className="text-sm text-gray-500 mt-2">{deck.card_count} {t('vocabulary.cards')}</div>
                     </motion.div>
                   ))
                 )}
@@ -213,7 +224,7 @@ export default function Vocabulary() {
           >
             <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">📊 Progress</h2>
+                <h2 className="text-2xl font-bold text-gray-900">📊 {t('vocabulary.progress')}</h2>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {masteryStats && Object.entries(masteryStats).map(([level, count]) => {
@@ -230,7 +241,7 @@ export default function Vocabulary() {
                         {count}
                       </div>
                       <div className={`font-bold ${colors.text}`}>{colors.label}</div>
-                      <div className="text-sm text-gray-500">cards</div>
+                      <div className="text-sm text-gray-500">{t('vocabulary.cards')}</div>
                     </motion.div>
                   );
                 })}
@@ -246,29 +257,29 @@ export default function Vocabulary() {
           className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50"
         >
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">🃏 All Cards</h2>
+            <h2 className="text-2xl font-bold text-gray-900">🃏 {t('vocabulary.allCards')}</h2>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowCreateCard(true)}
               className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl font-bold shadow-lg hover:from-purple-600 hover:to-pink-600 transition-all"
             >
-              + Add Card
+              + {t('vocabulary.addCard')}
             </motion.button>
           </div>
 
           {cards.length === 0 ? (
             <div className="text-center py-16">
               <div className="text-8xl mb-6">📝</div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">No cards yet</h3>
-              <p className="text-xl text-gray-600 mb-8">Create your first vocabulary card to start learning!</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">{t('vocabulary.noCards.title')}</h3>
+              <p className="text-xl text-gray-600 mb-8">{t('vocabulary.noCards.subtitle')}</p>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowCreateCard(true)}
                 className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl font-bold text-lg shadow-lg"
               >
-                Create Your First Card
+                {t('vocabulary.noCards.createFirst')}
               </motion.button>
             </div>
           ) : (
@@ -311,8 +322,8 @@ export default function Vocabulary() {
                       )}
                       <div className="mt-4 pt-4 border-t border-gray-100">
                         <div className="text-xs text-gray-400 flex items-center justify-between">
-                          <span>Reviewed {card.review_count}x</span>
-                          <span>{card.correct_count}/{card.review_count} correct</span>
+                          <span>{t('vocabulary.reviewedCount', { count: card.review_count })}</span>
+                          <span>{t('vocabulary.correctCount', { correct: card.correct_count, total: card.review_count })}</span>
                         </div>
                       </div>
                     </div>
@@ -331,38 +342,38 @@ export default function Vocabulary() {
             animate={{ scale: 1, opacity: 1 }}
             className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full"
           >
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Add New Card</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">{t('vocabulary.addCardModal.title')}</h3>
             <form onSubmit={handleCreateCard}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Front (Word/Phrase)</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">{t('vocabulary.addCardModal.frontLabel')}</label>
                   <input
                     type="text"
                     value={newCard.front}
                     onChange={(e) => setNewCard({ ...newCard, front: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500"
-                    placeholder="Enter word or phrase..."
+                    placeholder={t('vocabulary.addCardModal.frontPlaceholder')}
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Back (Definition)</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">{t('vocabulary.addCardModal.backLabel')}</label>
                   <input
                     type="text"
                     value={newCard.back}
                     onChange={(e) => setNewCard({ ...newCard, back: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500"
-                    placeholder="Enter definition..."
+                    placeholder={t('vocabulary.addCardModal.backPlaceholder')}
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Example Sentence (optional)</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">{t('vocabulary.addCardModal.exampleLabel')}</label>
                   <textarea
                     value={newCard.example}
                     onChange={(e) => setNewCard({ ...newCard, example: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500"
-                    placeholder="Enter an example..."
+                    placeholder={t('vocabulary.addCardModal.examplePlaceholder')}
                     rows={3}
                   />
                 </div>
@@ -373,13 +384,13 @@ export default function Vocabulary() {
                   onClick={() => setShowCreateCard(false)}
                   className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold"
                 >
-                  Add Card
+                  {t('vocabulary.addCardModal.submit')}
                 </button>
               </div>
             </form>
@@ -394,27 +405,27 @@ export default function Vocabulary() {
             animate={{ scale: 1, opacity: 1 }}
             className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full"
           >
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Create New Deck</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">{t('vocabulary.createDeckModal.title')}</h3>
             <form onSubmit={handleCreateDeck}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Deck Name</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">{t('vocabulary.createDeckModal.nameLabel')}</label>
                   <input
                     type="text"
                     value={newDeck.name}
                     onChange={(e) => setNewDeck({ ...newDeck, name: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500"
-                    placeholder="Enter deck name..."
+                    placeholder={t('vocabulary.createDeckModal.namePlaceholder')}
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Description (optional)</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">{t('vocabulary.createDeckModal.descriptionLabel')}</label>
                   <textarea
                     value={newDeck.description}
                     onChange={(e) => setNewDeck({ ...newDeck, description: e.target.value })}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500"
-                    placeholder="Enter description..."
+                    placeholder={t('vocabulary.createDeckModal.descriptionPlaceholder')}
                     rows={3}
                   />
                 </div>
@@ -425,13 +436,13 @@ export default function Vocabulary() {
                   onClick={() => setShowCreateDeck(false)}
                   className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold"
                 >
-                  Create Deck
+                  {t('vocabulary.createDeckModal.submit')}
                 </button>
               </div>
             </form>
