@@ -115,7 +115,7 @@ const LEARNING_CONTENT: Record<string, { title: string; vocabulary: string[]; gr
   bar: { title: '🍸 At the Bar', vocabulary: ['Bartender', 'Cocktail', 'On the rocks', 'Straight up', 'Tab', 'Draft beer', 'Wine list', 'Happy hour'], grammar: ['Could I have a drink?', 'What do you have on tap?', "I'll have another, please.", 'Could you start a tab?'], dialogue: "Bartender: What can I get for you?\nCustomer: What do you have on draft?\nBartender: We have a local IPA and a German lager." },
 };
 
-function LearningPanel({ content, onClose }: { content: typeof LEARNING_CONTENT[string] | null }) {
+function LearningPanel({ content, onClose }: { content: typeof LEARNING_CONTENT[string] | null; onClose: () => void }) {
   if (!content) return null;
   return (
     <motion.div initial={{ x: 400, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 400, opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 220 }} className="fixed right-0 top-0 h-full w-96 bg-gradient-to-b from-amber-50 to-orange-50 shadow-2xl z-50 overflow-y-auto border-l-2 border-amber-200">

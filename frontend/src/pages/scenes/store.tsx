@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Head from 'next/head';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, PointerLockControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { Navbar } from '../../components/Navbar';
@@ -243,7 +243,7 @@ const LEARNING_CONTENT: Record<string, {
   },
 };
 
-function LearningPanel({ content, onClose }: { content: typeof LEARNING_CONTENT[string] | null }) {
+function LearningPanel({ content, onClose }: { content: typeof LEARNING_CONTENT[string] | null; onClose: () => void }) {
   if (!content) return null;
 
   return (

@@ -4,7 +4,7 @@ import { Billboard, Html } from '@react-three/drei';
 import * as THREE from 'three';
 
 type AnimationState = 'idle' | 'talking' | 'listening' | 'waving';
-type CharacterRole = 'waiter' | 'customer_f' | 'customer_m';
+type CharacterRole = 'waiter' | 'customer_f' | 'customer_m' | 'security' | 'staff' | 'passenger' | 'barista';
 
 export interface Character3DProps {
   name: string;
