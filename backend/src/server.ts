@@ -17,9 +17,12 @@ import vocabularyCardRoutes from './routes/vocabularyCardRoutes';
 import aiTeacherRoutes from './routes/aiTeacherRoutes';
 import assessmentRoutes from './routes/assessmentRoutes';
 import progressRoutes from './routes/progressRoutes';
+import analyticsRoutes from './routes/analyticsRoutes';
 import { seedCourses } from './seed';
 import { seedAchievements, seedDailyQuests } from './services/gamificationService';
 import { VoiceServer } from './servers/voiceServer';
+import './entities/LearningSession';
+import './entities/UserReminder';
 
 dotenv.config();
 
@@ -52,6 +55,7 @@ app.use('/api/vocabulary', vocabularyCardRoutes);
 app.use('/api/ai-teacher', aiTeacherRoutes);
 app.use('/api/assessments', assessmentRoutes);
 app.use('/api/progress', progressRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 AppDataSource.initialize()
   .then(async () => {
